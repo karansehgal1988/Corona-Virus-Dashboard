@@ -1,0 +1,185 @@
+options(scipen = 999)
+
+library(dplyr)
+library(scales)
+
+url = "https://raw.githubusercontent.com/datasets/covid-19/master/data/time-series-19-covid-combined.csv"
+
+data1 = read.csv(url)
+
+str(data1)
+
+
+
+data1$Date = lubridate::as_date(data1$Date)
+
+
+data1[,c("Province.State","Lat","Long")] = list(NULL)
+
+data1 = dplyr::arrange(data1,desc(Date))
+
+
+data = data1%>%group_by(Date,Country.Region)%>%summarise(confirmed = sum(Confirmed),recoevered = sum(Recovered),deaths=sum(Deaths))
+
+
+data = dplyr::arrange(data,desc(Date))
+
+data2 = data.frame(filter(data,Date==(Sys.Date()-1)))
+
+data3 = data.frame(filter(data,Date==(Sys.Date()-2)))
+
+data_merged = inner_join(data2,data3,by= "Country.Region")
+
+
+data_merged$Date.y = NULL
+
+#------------------ Difference from current date to Previous date ----------#
+
+data_merged$Confirmed_delta = data_merged$confirmed.x - data_merged$confirmed.y
+
+data_merged$Recovered_delta = data_merged$recoevered.x - data_merged$recoevered.y
+  
+data_merged$Deaths_delta =   data_merged$deaths.x - data_merged$deaths.y
+  
+
+
+# --------- Top 15 Countries with Death Rate----------- #
+
+data_merged1 = arrange(data_merged,desc(deaths.x))[1:15,] 
+
+data_merged1[,c("Date.x", "confirmed.x" ,"recoevered.x", "confirmed.y","recoevered.y" ,"deaths.Confirmed_delta", "Recovered_delta",
+                "Deaths_delta","deaths.y", "Confirmed_delta")] = list(NULL)
+
+data_merged1$deaths.x = as.numeric(data_merged1$deaths.x)
+
+data_merged1$deaths.x = comma(data_merged1$deaths.x)
+
+#------------ Total Cases-----------#
+
+
+total_confirmed = sum(data_merged$confirmed.x)
+
+total_confirmed = comma(total_confirmed)
+
+total_confirmed
+
+data_merged3 = data_merged
+
+data_merged3$confirmed_Percentage= (round(data_merged3$confirmed.x/sum(data_merged3$confirmed.x),digits = 4))*100
+
+data_merged3 = data_merged3[1:5,]
+
+data_merged3[,c("Date.x", "confirmed.x", "deaths.x","recoevered.x", "confirmed.y","recoevered.y" ,"deaths.Confirmed_delta", "Recovered_delta",
+                "Deaths_delta","deaths.y", "Confirmed_delta","death_Percentage")] = list(NULL)
+
+data_merged3 
+
+
+#---------------------------------------# 
+
+total_death = sum(data_merged$deaths.x)
+
+total_death = comma(total_death)
+
+total_death
+
+data_merged2 = data_merged
+
+data_merged2$death_Percentage= (round(data_merged2$deaths.x/sum(data_merged2$deaths.x),digits = 4))*100
+
+data_merged2 = data_merged2[1:5,]
+
+
+data_merged2[,c("Date.x", "confirmed.x", "deaths.x","recoevered.x", "confirmed.y","recoevered.y" ,"deaths.Confirmed_delta", "Recovered_delta",
+                "Deaths_delta","deaths.y", "Confirmed_delta")] = list(NULL)
+
+data_merged2
+
+
+#-----------------------------------#
+
+total_recovered= sum(data_merged$recoevered.x)
+
+total_recovered = comma(total_recovered)
+
+total_recovered
+
+data_merged4 = data_merged
+
+data_merged4$confirmed_Percentage= (round(data_merged4$confirmed.x/sum(data_merged4$confirmed.x),digits = 4))*100
+
+data_merged4 = data_merged3[1:5,]
+
+data_merged4[,c("Date.x", "confirmed.x", "deaths.x","recoevered.x", "confirmed.y","recoevered.y" ,"deaths.Confirmed_delta", "Recovered_delta",
+                "Deaths_delta","deaths.y", "Confirmed_delta","death_Percentage")] = list(NULL)
+
+data_merged4
+
+#--------------------- Shiny Dashboard -------------------------#
+  
+library(shiny)
+library(shinydashboard)
+   
+ui = shinyUI(
+dashboardPage(
+dashboardHeader(title = "Coronavirus Status Dashboard",titleWidth = 325),
+dashboardSidebar(
+sidebarMenu( 
+menuItem(text = "Overall Stats",tabName = "Overall_Stats",icon = icon("clipboard")),
+menuItem(text = "Top 15",tabName = "top15",icon = icon("clipboard"))
+)
+),
+dashboardBody(
+  
+tabItems(
+  tabItem("Overall_Stats",
+  fluidRow( 
+  box(title = "Total Confirmed", background= "blue",solidHeader = T, width = 2, collapsible = T,style = "font-size: 250%;", textOutput("total_confirmed")), 
+  box(title = "Total Deaths", background= "red",solidHeader = T, width = 2, collapsible = T,style = "font-size: 250%;",textOutput("total_death")),
+  box(title = "Total Recovered", background= "green",solidHeader = T, width = 2, collapsible = T,style = "font-size: 250%;",textOutput("total_recovered"))),
+  fluidRow( 
+  box(title = "Total Recovered", background= "green",solidHeader = T, width = 2, collapsible = T,style = "font-size: 250%;",textOutput("total_recovered1")))))))
+
+
+
+
+server = shinyServer(function(input,output){
+output$total_confirmed = renderText(total_confirmed)
+output$total_death = renderText(total_death)
+output$total_recovered = renderText(total_recovered)
+output$total_recovered1 = renderText(total_recovered)
+})
+
+shinyApp(ui,server)
+  
+
+
+
+#------------------------#
+
+library(shiny)
+library(shinydashboard)
+
+ui = shinyUI(
+  dashboardPage(
+    dashboardHeader(title = "Coronavirus Status Dashboard",titleWidth = 325),
+    dashboardSidebar(
+      sidebarMenu( 
+        menuItem(text = "Overall Stats",tabName = "Overall_Stats",icon = icon("clipboard")),
+        menuItem(text = "Top 15",tabName = "top15",icon = icon("clipboard"))
+      )),
+    
+    dashboardBody(
+      
+      tabItems(
+        tabItem(tabName = "Overall_Stats",p("thhthththh")),
+        tabItem(tabName = "top15", p("xxxxxxx"))
+        
+      )
+    )
+  ))
+server = shinyServer(function(input,output,session){})
+shinyApp(ui,server)
+
+
+

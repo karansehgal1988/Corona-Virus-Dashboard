@@ -2,12 +2,17 @@ options(scipen = 999)
 
 library(dplyr)
 library(scales)
+library(formattable)
 
 url = "https://raw.githubusercontent.com/datasets/covid-19/master/data/time-series-19-covid-combined.csv"
 
 data1 = read.csv(url)
 
+str(data1)
+
 data1$Date = lubridate::as_date(data1$Date)
+
+View(data1)
 
 data1[,c("Province.State","Lat","Long")] = list(NULL)
 
@@ -18,9 +23,25 @@ data = data1%>%group_by(Date,Country.Region)%>%summarise(confirmed = sum(Confirm
 
 data = dplyr::arrange(data,desc(Date))
 
-data2 = data.frame(filter(data,Date==(Sys.Date()-2)))
+date1 = Sys.Date() -  data1[1,"Date"]
 
-data3 = data.frame(filter(data,Date==(Sys.Date()-3)))
+#----------------------------------- Automatic Data Selection Code for Data Selection--------------------#
+
+date2 =  if (date1 == 1) {
+  Sys.Date()-1
+} else {
+  Sys.Date()-2
+}
+
+date3 =  if (date1 == 1) {
+  Sys.Date()-2
+} else {
+  Sys.Date()-3
+}
+
+data2 = data.frame(filter(data,Date==date2))
+
+data3 = data.frame(filter(data,Date==date3))
 
 data_merged = inner_join(data2,data3,by= "Country.Region")
 
@@ -46,6 +67,7 @@ data_merged$Recovered_delta = data_merged$recovered.x - data_merged$recovered.y
   
 data_merged$Deaths_delta =   data_merged$deaths.x - data_merged$deaths.y
 
+data_merged$Active_delta =   data_merged$active.x - data_merged$active.y
 
 #-------------------- Renaming of the Variables------------------#
 
@@ -53,7 +75,7 @@ colnames(data_merged)
 
 data_merged = rename(data_merged, Country = Country.Region, Confirmed = confirmed.x, Recovered = recovered.x, Deaths = deaths.x,
                      Active = active.x, Confirmed_Increase = Confirmed_delta, Recovered_Increase = Recovered_delta,
-                     Deaths_Increase = Deaths_delta)
+                     Deaths_Increase = Deaths_delta, Active_Increase = Active_delta  )
   
 
 
@@ -80,13 +102,17 @@ data_merged_conf_no = data_merged3[1:5,c("Country","Confirmed")]
 
 data_merged_conf_no
 
-####------------ Top 5 Countries Confirmed Cases percentage.------------#
+#------------ Top 5 Countries Confirmed Cases percentage.------------#
 
 
-data_merged3$confirmed_Percentage = (round(data_merged3$Confirmed/sum(data_merged3$Confirmed),digits = 4))*100
+data_merged3$Confirmed_Percentage = (round(data_merged3$Confirmed/sum(data_merged3$Confirmed),digits = 4))*100
 
 
-data_merged_conf_pr = data_merged3[1:5,c("Country","confirmed_Percentage")]
+data_merged_conf_pr = data_merged3[1:5,c("Country","Confirmed_Percentage")]
+
+colnames(data_merged_conf_pr)
+
+data_merged_conf_pr$Confirmed_Percentage = sprintf("%3g%%", data_merged_conf_pr$Confirmed_Percentage)
 
 data_merged_conf_pr
 
@@ -127,7 +153,6 @@ data_merged_deaths_no = data_merged2[1:5,c("Country","Deaths")]
 
 data_merged_deaths_no
 
-
 #------------ Top 5 Countries Deaths Cases Percentage.------------#
 
 
@@ -135,6 +160,8 @@ data_merged_deaths_no
 data_merged2$Death_Percentage= (round(data_merged2$deaths/sum(data_merged2$deaths),digits = 4))*100
 
 data_merged_death_pr = data_merged2[1:5,c("Country","Death_Percentage")]
+
+data_merged_death_pr$Death_Percentage = sprintf("%3g%%", data_merged_death_pr$Death_Percentage)
 
 data_merged_death_pr
 
@@ -163,32 +190,94 @@ total_recovered = comma(total_recovered)
 total_recovered
 
 
-
-
 #--------- Top 5 Countries Recovered Cases Numbers---------------#
-
 
 data_merged4 = data_merged
 
-data_merged4 = arrange(data_merged4, desc(Recovered))
+colnames(data_merged)
 
+data_merged4 = arrange(data_merged4, desc(Recovered))
 
 data_merged_recovered_no = data_merged4[1:5,c("Country","Recovered")]
 
 data_merged_recovered_no
 
 
-#--------- Top 5 Countries Recovered Cases Percentage---------------#
 
+#--------- Top 5 Countries Recovered Cases Percentage---------------#
 
 data_merged4$Recovered_Percentage= (round(data_merged4$Recovered/sum(data_merged2$Recovered),digits = 4))*100
 
 data_merged_recovered_pr = data_merged4[1:5,c("Country","Recovered_Percentage")]
 
+data_merged_recovered_pr$Recovered_Percentage = sprintf("%3g%%", data_merged_recovered_pr$Recovered_Percentage)
+
 data_merged_recovered_pr
 
 
+#------------------- Top 5 Countries Recovered delta----------------#
+
+data_merged4 = arrange(data_merged4, desc(Recovered_Increase))
+
+data_merged_recovered_delta = data_merged4[1:5,c("Country","Recovered_Increase")]
+
+data_merged_recovered_delta
+
+
+
 #---------------------------------------------------- Recovered Cases Ends---------------------------------#
+
+
+
+#---------------------------------------------------- Active Cases Starts---------------------------------#
+
+
+#--------- Total Active Cases---------------#
+
+total_active = sum(data_merged$Active)
+
+total_active = comma(total_active)
+
+total_active
+
+
+
+#--------- Top 5 Countries Active Cases Numbers---------------#
+
+
+data_merged5 = data_merged
+
+colnames(data_merged5)
+
+data_merged5 = arrange(data_merged5, desc(Active))
+
+data_merged_Active_no = data_merged5[1:5,c("Country","Active")]
+
+data_merged_Active_no
+
+#--------- Top 5 Countries Active Cases Percentage---------------#
+
+data_merged5$Active_Percentage= (round(data_merged5$Active/sum(data_merged5$Active),digits = 4))*100
+
+data_merged_Active_pr = data_merged5[1:5,c("Country","Active_Percentage")]
+
+data_merged_Active_pr$Active_Percentage = sprintf("%3g%%", data_merged_Active_pr$Active_Percentage)
+
+data_merged_Active_pr
+
+
+
+
+#------------------- Top 5 Cuntries Active delta----------------#
+
+data_merged5 = arrange(data_merged5, desc(Active_Increase))
+
+data_merged_Active_delta = data_merged5[1:5,c("Country","Active_Increase")]
+
+data_merged_Active_delta
+
+
+#---------------------------------------------------- Active Cases Ends---------------------------------#
 
 
 #--------------------- Shiny Dashboard -------------------------#
@@ -201,20 +290,24 @@ body = dashboardBody(
   fluidRow(
     box(title = "Total Confirmed", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;", textOutput("total_confirmed")),
     box(title = "Total Deaths", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("total_death")),
-    box(title = "Total Recovered", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("total_recovered"))    
-        ),
+    box(title = "Total Recovered", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("total_recovered")),    
+    box(title = "Total Active", background= "purple",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("total_active"))    
+    ),
   
   fluidRow(
-    box(title = "Top5 Confirmed Countries (Nos)", background= "black",solidHeader = T, width = 3, collapsible = T,style = "font-size: 100%;",tableOutput("top5confirmedno")),      
-    box(title = "Top5 Deaths Countries (Nos)", background= "black",solidHeader = T, width = 3, collapsible = T,style = "font-size: 100%;",tableOutput("top5deathsno")),
-    box(title = "Top5 Recovered Countries (Nos)", background= "black",solidHeader = T, width = 3, collapsible = T,style = "font-size: 100%;",tableOutput("top5recoveredno"))
+    box(title = "Top5 Countries Confirmed (Nos)", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5confirmedno")),      
+    box(title = "Top5 Countries Deaths (Nos)", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5deathsno")),
+    box(title = "Top5 Countries Recovered (Nos)", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5recoveredno")),
+    box(title = "Top5 Countries Active (Nos)", background= "purple",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5activeno"))
   ),
   
 
   fluidRow(
-    box(title = "Top5 Confirmed Countries (%)", background= "black",solidHeader = T, width = 3, collapsible = T,style = "font-size: 100%;",tableOutput("top5confirmedper"))       
-      
-   ),
+    box(title = "Top5 Countries Confirmed (%)", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5confirmedper")),       
+    box(title = "Top5 Countries Deaths (%)", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5deathsper")),
+    box(title = "Top5 Countries Recovered (%)", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5recoveredper")),
+    box(title = "Top5 Countries Active (%)", background= "purple",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5activeper"))
+  ),
 
   fluidRow(
 )
@@ -222,7 +315,7 @@ body = dashboardBody(
 
 
 ui <- dashboardPage(
-  dashboardHeader(title = "Coronavirus Status Dashboard"),
+  dashboardHeader(title = span("Coronavirus Status Dashboard",style = "font-family: Tahoma; font-weight: bold"),titleWidth = 1500),
   dashboardSidebar(disable = T),
   body
 )
@@ -235,14 +328,17 @@ shinyApp(ui = ui, server = function(input, output) {
   output$total_confirmed = renderText(total_confirmed)
   output$total_death = renderText(total_death)
   output$total_recovered = renderText(total_recovered)
-  output$top5confirmedno = renderTable(data_merged_conf_no)
-  output$top5deathsno = renderTable(data_merged_deaths_no)
-  output$top5recoveredno = renderTable(data_merged_recovered_no)
-  
-  
-  
+  output$total_active = renderText(total_active)
+  output$top5confirmedno = renderTable(data_merged_conf_no, digits = 0)
+  output$top5deathsno = renderTable(data_merged_deaths_no,digits = 0)
+  output$top5recoveredno = renderTable(data_merged_recovered_no, digits = 0)
+  output$top5activeno = renderTable(data_merged_Active_no, digits = 0)
   output$top5confirmedper = renderTable(data_merged_conf_pr)
-  })
+  output$top5deathsper = renderTable(data_merged_death_pr)
+  output$top5recoveredper = renderTable(data_merged_recovered_pr)
+  output$top5activeper = renderTable(data_merged_Active_pr)
+  
+   })
 
 #-------------------------------------------#
 

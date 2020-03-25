@@ -7,11 +7,7 @@ url = "https://raw.githubusercontent.com/datasets/covid-19/master/data/time-seri
 
 data1 = read.csv(url)
 
-str(data1)
-
-
 data1$Date = lubridate::as_date(data1$Date)
-
 
 data1[,c("Province.State","Lat","Long")] = list(NULL)
 
@@ -28,6 +24,17 @@ data3 = data.frame(filter(data,Date==(Sys.Date()-3)))
 
 data_merged = inner_join(data2,data3,by= "Country.Region")
 
+# ------------ Repalcing NA with 0--------------------#
+
+data_merged$confirmed.x[is.na(data_merged$confirmed.x)] = 0
+data_merged$recovered.x[is.na(data_merged$recovered.x)] = 0
+data_merged$deaths.x[is.na(data_merged$deaths.x)] = 0
+data_merged$confirmed.y[is.na(data_merged$confirmed.y)] = 0
+data_merged$recovered.y[is.na(data_merged$recovered.y)] = 0
+data_merged$deaths.y[is.na(data_merged$deaths.y)] = 0
+
+data_merged$active.x = data_merged$confirmed.x - (data_merged$recovered.x+data_merged$deaths.x)
+data_merged$active.y = data_merged$confirmed.y - (data_merged$recovered.y+data_merged$deaths.y)
 
 data_merged$Date.y = NULL
 
@@ -38,106 +45,151 @@ data_merged$Confirmed_delta = data_merged$confirmed.x - data_merged$confirmed.y
 data_merged$Recovered_delta = data_merged$recovered.x - data_merged$recovered.y
   
 data_merged$Deaths_delta =   data_merged$deaths.x - data_merged$deaths.y
+
+
+#-------------------- Renaming of the Variables------------------#
+
+colnames(data_merged)
+
+data_merged = rename(data_merged, Country = Country.Region, Confirmed = confirmed.x, Recovered = recovered.x, Deaths = deaths.x,
+                     Active = active.x, Confirmed_Increase = Confirmed_delta, Recovered_Increase = Recovered_delta,
+                     Deaths_Increase = Deaths_delta)
   
+
+
+#-----------------------------------------------------Confirmed Cases Starts---------------------------------#
 
 
 #------------ Total Confimed Cases-----------#
 
 
-total_confirmed = sum(data_merged$confirmed.x)
+total_confirmed = sum(data_merged$Confirmed)
 
 total_confirmed = comma(total_confirmed)
 
-total_confirmed
+total_confirmed 
 
 #------------ Top 5 Countries Confirmed Cases No.------------#
 
 data_merged3 = data_merged
 
-data_merged3 = arrange(data_merged3, desc(confirmed.x))
+data_merged3 = arrange(data_merged3, desc(Confirmed))
 
 
-data_merged_conf_no = data_merged3[1:5,c("Country.Region","confirmed.x")]
+data_merged_conf_no = data_merged3[1:5,c("Country","Confirmed")]
 
 data_merged_conf_no
 
 ####------------ Top 5 Countries Confirmed Cases percentage.------------#
 
 
-data_merged3$confirmed_Percentage = (round(data_merged3$confirmed.x/sum(data_merged3$confirmed.x),digits = 4))*100
+data_merged3$confirmed_Percentage = (round(data_merged3$Confirmed/sum(data_merged3$Confirmed),digits = 4))*100
 
 
-data_merged_conf_pr = data_merged3[1:5,c("Country.Region","confirmed_Percentage")]
+data_merged_conf_pr = data_merged3[1:5,c("Country","confirmed_Percentage")]
 
 data_merged_conf_pr
 
 #------------------- Top 5 ountries Confirmed delta----------------#
 
+data_merged3 = arrange(data_merged3, desc(Confirmed_Increase))
 
-data_merged3 = arrange(data_merged3, desc(Confirmed_delta))
 
-data_merged_conf_delta = data_merged3[1:5,c("Country.Region","Confirmed_delta")]
+
+data_merged_conf_delta = data_merged3[1:5,c("Country","Confirmed_Increase")]
+
 
 data_merged_conf_delta
 
+#-------------------------------------------------Confirmed Cases Ends--------------------------------#
 
 
+#------------------------------------------------- Deaths Cases Starts----------------------------------------#
 
 
 
 #--------- Total Deaths Cases---------------#
 
-total_death = sum(data_merged$deaths.x)
+total_death = sum(data_merged$Deaths)
 
 total_death = comma(total_death)
 
 total_death
 
-#--------------- Top 5 Countries Death Cases--------#
+#------------ Top 5 Countries Deaths Cases No.------------#
 
 data_merged2 = data_merged
 
-str(data_merged)
-
-data_merged2$death_Percentage= (round(data_merged2$deaths.x/sum(data_merged2$deaths.x),digits = 4))*100
+data_merged2 = arrange(data_merged2, desc(Deaths))
 
 
+data_merged_deaths_no = data_merged2[1:5,c("Country","Deaths")]
 
-data_merged2 = arrange(data_merged2,desc(death_Percentage))
+data_merged_deaths_no
 
-data_merged2 = data_merged2[1:5,]                       
 
-data_merged2[,c("Date.x", "confirmed.x", "deaths.x","recovered.x", "confirmed.y","recovered.y" ,"deaths.Confirmed_delta", "Recovered_delta",
-                "Deaths_delta","deaths.y", "Confirmed_delta")] = list(NULL)
+#------------ Top 5 Countries Deaths Cases Percentage.------------#
 
-data_merged2
-data.frame(data_merged2)
+
+
+data_merged2$Death_Percentage= (round(data_merged2$deaths/sum(data_merged2$deaths),digits = 4))*100
+
+data_merged_death_pr = data_merged2[1:5,c("Country","Death_Percentage")]
+
+data_merged_death_pr
+
+
+#------------------- Top 5 ountries Deaths delta----------------#
+
+
+data_merged2 = arrange(data_merged2, desc(Confirmed_Increase))
+
+data_merged_conf_delta = data_merged2[1:5,c("Country","Deaths_Increase")]
+
+data_merged_conf_delta
+
+
+#---------------------------------------------------------Deaths Cases Ends----------------------------------#
+
+
+#---------------------------------------------------------Recovered Cases Starts----------------------------------#
 
 #--------- Total Recovered Cases---------------#
 
-
-
-total_recovered= sum(data_merged$recovered.x,na.rm = T)
+total_recovered= sum(data_merged$Recovered)
 
 total_recovered = comma(total_recovered)
 
 total_recovered
 
-#--------- Top 5 Countries Recovered Cases---------------#
+
+
+
+#--------- Top 5 Countries Recovered Cases Numbers---------------#
+
 
 data_merged4 = data_merged
 
-data_merged4$confirmed_Percentage= (round(data_merged4$confirmed.x/sum(data_merged4$confirmed.x),digits = 4))*100
+data_merged4 = arrange(data_merged4, desc(Recovered))
 
 
-data_merged4 = arrange(data_merged4,desc(confirmed_Percentage))
+data_merged_recovered_no = data_merged4[1:5,c("Country","Recovered")]
 
-data_merged4 = data_merged4[1:5,]
+data_merged_recovered_no
 
-data_merged4[,c("Date.x", "confirmed.x", "deaths.x","recovered.x", "confirmed.y","recovered.y" ,"deaths.Confirmed_delta", "Recovered_delta",
-                "Deaths_delta","deaths.y", "Confirmed_delta","death_Percentage")] = list(NULL)
 
-data_merged4
+#--------- Top 5 Countries Recovered Cases Percentage---------------#
+
+
+data_merged4$Recovered_Percentage= (round(data_merged4$Recovered/sum(data_merged2$Recovered),digits = 4))*100
+
+data_merged_recovered_pr = data_merged4[1:5,c("Country","Recovered_Percentage")]
+
+data_merged_recovered_pr
+
+
+#---------------------------------------------------- Recovered Cases Ends---------------------------------#
+
 
 #--------------------- Shiny Dashboard -------------------------#
 
@@ -153,10 +205,12 @@ body = dashboardBody(
         ),
   
   fluidRow(
-    box(title = "Top5 Confirmed Countries (No.)", background= "black",solidHeader = T, width = 3, collapsible = T,style = "font-size: 100%;",tableOutput("top5confirmedno"))      
-  
+    box(title = "Top5 Confirmed Countries (Nos)", background= "black",solidHeader = T, width = 3, collapsible = T,style = "font-size: 100%;",tableOutput("top5confirmedno")),      
+    box(title = "Top5 Deaths Countries (Nos)", background= "black",solidHeader = T, width = 3, collapsible = T,style = "font-size: 100%;",tableOutput("top5deathsno")),
+    box(title = "Top5 Recovered Countries (Nos)", background= "black",solidHeader = T, width = 3, collapsible = T,style = "font-size: 100%;",tableOutput("top5recoveredno"))
   ),
   
+
   fluidRow(
     box(title = "Top5 Confirmed Countries (%)", background= "black",solidHeader = T, width = 3, collapsible = T,style = "font-size: 100%;",tableOutput("top5confirmedper"))       
       
@@ -182,6 +236,11 @@ shinyApp(ui = ui, server = function(input, output) {
   output$total_death = renderText(total_death)
   output$total_recovered = renderText(total_recovered)
   output$top5confirmedno = renderTable(data_merged_conf_no)
+  output$top5deathsno = renderTable(data_merged_deaths_no)
+  output$top5recoveredno = renderTable(data_merged_recovered_no)
+  
+  
+  
   output$top5confirmedper = renderTable(data_merged_conf_pr)
   })
 

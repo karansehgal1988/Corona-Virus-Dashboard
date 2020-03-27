@@ -8,17 +8,14 @@ url = "https://raw.githubusercontent.com/datasets/covid-19/master/data/time-seri
 
 data1 = read.csv(url)
 
-str(data1)
-
 data1$Date = lubridate::as_date(data1$Date)
-
-View(data1)
 
 data1[,c("Province.State","Lat","Long")] = list(NULL)
 
 data1 = dplyr::arrange(data1,desc(Date))
 
-data = data1%>%group_by(Date,Country.Region)%>%summarise(confirmed = sum(Confirmed),recovered = sum(Recovered),deaths=sum(Deaths))
+
+data = data1%>%group_by(Date,Country.Region)%>%summarise(confirmed = sum(Confirmed),deaths=sum(Deaths))
 
 
 data = dplyr::arrange(data,desc(Date))
@@ -73,9 +70,8 @@ data_merged$Active_delta =   data_merged$active.x - data_merged$active.y
 
 colnames(data_merged)
 
-data_merged = rename(data_merged, Country = Country.Region, Confirmed = confirmed.x, Recovered = recovered.x, Deaths = deaths.x,
-                     Active = active.x, Confirmed_Increase = Confirmed_delta, Recovered_Increase = Recovered_delta,
-                     Deaths_Increase = Deaths_delta, Active_Increase = Active_delta  )
+data_merged = rename(data_merged, Country = Country.Region, Confirmed = confirmed.x, Deaths = deaths.x,
+                     Confirmed_Increase = Confirmed_delta, Deaths_Increase = Deaths_delta)
   
 
 
@@ -289,24 +285,18 @@ library(DT)
 body = dashboardBody(
   fluidRow(
     box(title = "Total Confirmed", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;", textOutput("total_confirmed")),
-    box(title = "Total Deaths", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("total_death")),
-    box(title = "Total Recovered", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("total_recovered")),    
-    box(title = "Total Active", background= "purple",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("total_active"))    
+    box(title = "Total Deaths", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("total_death"))
     ),
   
   fluidRow(
     box(title = "Top5 Countries Confirmed (Nos)", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5confirmedno")),      
-    box(title = "Top5 Countries Deaths (Nos)", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5deathsno")),
-    box(title = "Top5 Countries Recovered (Nos)", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5recoveredno")),
-    box(title = "Top5 Countries Active (Nos)", background= "purple",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5activeno"))
+    box(title = "Top5 Countries Deaths (Nos)", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5deathsno"))
   ),
   
 
   fluidRow(
     box(title = "Top5 Countries Confirmed (%)", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5confirmedper")),       
-    box(title = "Top5 Countries Deaths (%)", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5deathsper")),
-    box(title = "Top5 Countries Recovered (%)", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5recoveredper")),
-    box(title = "Top5 Countries Active (%)", background= "purple",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5activeper"))
+    box(title = "Top5 Countries Deaths (%)", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5deathsper"))
   ),
 
   fluidRow(
@@ -327,20 +317,10 @@ shinyApp(ui = ui, server = function(input, output) {
   
   output$total_confirmed = renderText(total_confirmed)
   output$total_death = renderText(total_death)
-  output$total_recovered = renderText(total_recovered)
-  output$total_active = renderText(total_active)
   output$top5confirmedno = renderTable(data_merged_conf_no, digits = 0)
   output$top5deathsno = renderTable(data_merged_deaths_no,digits = 0)
-  output$top5recoveredno = renderTable(data_merged_recovered_no, digits = 0)
-  output$top5activeno = renderTable(data_merged_Active_no, digits = 0)
   output$top5confirmedper = renderTable(data_merged_conf_pr)
   output$top5deathsper = renderTable(data_merged_death_pr)
-  output$top5recoveredper = renderTable(data_merged_recovered_pr)
-  output$top5activeper = renderTable(data_merged_Active_pr)
-  
    })
 
 #-------------------------------------------#
-
-
-

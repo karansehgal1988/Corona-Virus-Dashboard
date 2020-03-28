@@ -11,12 +11,11 @@ colnames(data)
 
 data$Date = lubridate::as_date(data$Date)
 
-data[,c("Province.State","Lat","Long")] = list(NULL)
 
 data = dplyr::arrange(data,desc(Date))
 
 
-data1 = data%>%group_by(Date,Country)%>%summarise(confirmed = sum(Confirmed),deaths=sum(Deaths))
+data1 = data%>%group_by(Date,Country)%>%summarise(confirmed = sum(Confirmed),deaths=sum(Deaths),recovered = sum(Recovered))
 
 
 data1 = dplyr::arrange(data,desc(Date))
@@ -41,6 +40,8 @@ data2 = data.frame(filter(data1,Date==date2))
 
 data3 = data.frame(filter(data1,Date==date3))
 
+data2$Active = data2$Confirmed - (data2$Recovered+data2$Deaths)
+data3$Active = data3$Confirmed - (data3$Recovered+data3$Deaths)
 
 data_merged = inner_join(data2,data3,by= "Country")
 
@@ -48,8 +49,11 @@ data_merged = inner_join(data2,data3,by= "Country")
 
 data_merged$Confirmed.x[is.na(data_merged$Confirmed.x)] = 0
 data_merged$Deaths.x[is.na(data_merged$Deaths.x)] = 0
+data_merged$Recovered.x[is.na(data_merged$Recovered.x)] = 0
 data_merged$Confirmed.y[is.na(data_merged$Confirmed.y)] = 0
 data_merged$Deaths.y[is.na(data_merged$Deaths.y)] = 0
+data_merged$Recovered.y[is.na(data_merged$Recovered.y)] = 0
+
 data_merged$Date.y = NULL
 
 #------------------ Difference from current date to Previous date ----------#
@@ -60,15 +64,21 @@ data_merged$Confirmed_delta = data_merged$Confirmed.x - data_merged$Confirmed.y
 data_merged$Deaths_delta =   data_merged$Deaths.x - data_merged$Deaths.y
 
 
+data_merged$Recovered_delta =   data_merged$Recovered.x - data_merged$Recovered.y
 
+data_merged$Active_delta =   data_merged$Active.x - data_merged$Active.y
 
+# ------------ Repalcing NA with 0 for active --------------------#
 
+data_merged$Active.x[is.na(data_merged$Active.x)] = 0
+data_merged$Active.y[is.na(data_merged$Active.y)] = 0
 #-------------------- Renaming of the Variables------------------#
 
 colnames(data_merged)
 
-data_merged = rename(data_merged, Confirmed = Confirmed.x, Deaths = Deaths.x,
-                     Confirmed_Increase = Confirmed_delta, Deaths_Increase = Deaths_delta)
+data_merged = rename(data_merged, Confirmed = Confirmed.x, Deaths = Deaths.x,Recovered = Recovered.x, Active = Active.x,
+                     Confirmed_Increase = Confirmed_delta, Deaths_Increase = Deaths_delta,
+                     Recovered_Increase = Recovered_delta, Active_Increase = Active_delta)
   
 
 
@@ -213,6 +223,106 @@ data_merged_deaths_inc_per
 
 #---------------------------------------------------------Deaths Cases Ends----------------------------------#
 
+
+#-------------------------------------Recovered Cases Starts-----------------------------#
+
+#--------- Total Recovered Cases---------------#
+
+total_recovered = sum(data_merged$Recovered)
+
+total_recovered = comma(total_recovered)
+
+total_recovered
+
+#------------ Top 5 Countries Recovered Cases No.------------#
+
+data_merged5 = data_merged
+
+data_merged5 = arrange(data_merged5, desc(Recovered))
+
+
+data_merged_recovered_no = data_merged5[1:5,c("Country","Recovered")]
+
+data_merged_recovered_no
+
+#------------ Top 5 Countries Recovered Cases Percentage.------------#
+
+
+data_merged5$Recovered_Percentage= (round(data_merged5$Recovered/sum(data_merged5$Recovered),digits = 4))*100
+
+data_merged_Recovered_pr = data_merged5[1:5,c("Country","Recovered_Percentage")]
+
+data_merged_Recovered_pr$Recovered_Percentage = sprintf("%3g%%", data_merged_Recovered_pr$Recovered_Percentage)
+
+data_merged_Recovered_pr
+
+
+#------------------- Total Recovered delta----------------#
+
+data_merged_recovered_delta_total = sum(data_merged5$Recovered_Increase)
+
+data_merged_recovered_delta_total
+
+
+#------------------- Top 5 countries Recovered delta no.----------------#
+
+
+data_merged5 = arrange(data_merged5, desc(Recovered_Increase))
+
+
+data_merged_recovered_delta_no = data_merged5[1:5,c("Country","Recovered_Increase")]
+
+
+data_merged_recovered_delta_no
+
+
+#------------------- Top 5 countries Recovered delta percentage.----------------#
+
+data_merged5$Recovered_Increase_Perct = round(data_merged5$Recovered_Increase/(sum(data_merged$Recovered_Increase))*100,digits = 2)
+
+
+data_merged_recovered_inc_per = data_merged5[1:5,c("Country","Recovered_Increase_Perct")]
+
+
+data_merged_recovered_inc_per$Recovered_Increase_Perct   = sprintf("%3g%%",data_merged_recovered_inc_per$Recovered_Increase_Perct)
+
+data_merged_recovered_inc_per
+
+
+#--------------------------------------- Recovered Cases Ends--------------------------#
+
+#--------------------------------------- Active Cases Cases Ends--------------------------------#
+
+total_active = sum(data_merged$Active)
+
+total_active = comma(total_active)
+
+total_active
+
+
+#------------ Top 5 Countries Active Cases No.------------#
+
+data_merged6 = data_merged
+
+data_merged6 = arrange(data_merged6, desc(Active))
+
+
+data_merged_active_no = data_merged6[1:5,c("Country","Active")]
+
+data_merged_active_no
+
+#------------ Top 5 Countries Recovered Cases Percentage.------------#
+
+
+data_merged6$Active_Percentage= (round(data_merged6$Active/sum(data_merged6$Active),digits = 4))*100
+
+data_merged_Active_pr = data_merged6[1:5,c("Country","Active_Percentage")]
+
+data_merged_Active_pr$Active_Percentage = sprintf("%3g%%", data_merged_Active_pr$Active_Percentage)
+
+data_merged_Active_pr
+
+
 #-------------------------------------Mortality %-----------------------------#
 
 #Overall %
@@ -293,8 +403,8 @@ body = dashboardBody(tabItems(
   fluidRow(
     box(title = "Total Confirmed", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;", textOutput("total_confirmed")),
     box(title = "Total Deaths", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("total_death")),
-    box(title = "Total Confirmed Increase", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("total_confirmed_inc")),
-    box(title = "Total Deaths Increase", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("total_death_inc"))
+    box(title = "Total Confirmed Increase/Day", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("total_confirmed_inc")),
+    box(title = "Total Deaths Increase/Day", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("total_death_inc"))
     ),
   
   fluidRow(
@@ -317,7 +427,7 @@ tabItem(tabName = "indiastats", c("xcmfkf"))
 )
 
 ui <- dashboardPage(skin = "green",
-  dashboardHeader(title = span("Coronavirus Status Dashboard",style = "font-family: Tahoma; font-weight: bold"),titleWidth = 1500),
+  dashboardHeader(title = span("Coronavirus Status Dashboard (Data Updated till March 27th,2020 / Data Source - John Hopkins University)",style = "font-family: Tahoma; font-weight: bold"),titleWidth = 1500),
   sidebar,
   body
 )

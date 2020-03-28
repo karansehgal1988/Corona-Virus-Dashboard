@@ -77,8 +77,8 @@ data_merged$Active.y[is.na(data_merged$Active.y)] = 0
 colnames(data_merged)
 
 data_merged = rename(data_merged, Confirmed = Confirmed.x, Deaths = Deaths.x,Recovered = Recovered.x, Active = Active.x,
-                     Confirmed_Increase = Confirmed_delta, Deaths_Increase = Deaths_delta,
-                     Recovered_Increase = Recovered_delta, Active_Increase = Active_delta)
+                     Confirmed_Incs = Confirmed_delta, Deaths_Incs = Deaths_delta,
+                     Recovered_Incs = Recovered_delta, Active_Incs = Active_delta)
   
 
 
@@ -122,17 +122,17 @@ data_merged_conf_pr
 
 #------------------- Total Confirmed delta no.----------------#
 
-data_merged_conf_delta_total = sum(data_merged3$Confirmed_Increase)
+data_merged_conf_delta_total = sum(data_merged3$Confirmed_Incs)
 
 data_merged_conf_delta_total
 
 #------------------- Top 5 countries Confirmed delta no.----------------#
 
 
-data_merged3 = arrange(data_merged3, desc(Confirmed_Increase))
+data_merged3 = arrange(data_merged3, desc(Confirmed_Incs))
 
 
-data_merged_conf_delta_no = data_merged3[1:5,c("Country","Confirmed_Increase")]
+data_merged_conf_delta_no = data_merged3[1:5,c("Country","Confirmed_Incs")]
 
 
 data_merged_conf_delta_no
@@ -140,14 +140,14 @@ data_merged_conf_delta_no
 
 #------------------- Top 5 countries Confirmed delta percentage.----------------#
 
-data_merged3$Confirmed_Increase_Perct = round(data_merged3$Confirmed_Increase/(sum(data_merged3$Confirmed_Increase))*100,digits = 2)
+data_merged3$Confirmed_Incs_Perct = round(data_merged3$Confirmed_Incs/(sum(data_merged3$Confirmed_Incs))*100,digits = 2)
 
 
-data_merged_conf_inc_per = data_merged3[1:5,c("Country","Confirmed_Increase_Perct")]
+data_merged_conf_inc_per = data_merged3[1:5,c("Country","Confirmed_Incs_Perct")]
 
 colnames(data_merged_conf_inc_per)
 
-data_merged_conf_inc_per$Confirmed_Increase_Perct   = sprintf("%3g%%", data_merged_conf_inc_per$Confirmed_Increase_Perct)
+data_merged_conf_inc_per$Confirmed_Incs_Perct   = sprintf("%3g%%", data_merged_conf_inc_per$Confirmed_Incs_Perct)
 
 data_merged_conf_inc_per
 
@@ -181,18 +181,18 @@ data_merged_deaths_no
 #------------ Top 5 Countries Deaths Cases Percentage.------------#
 
 
-data_merged2$Death_Percentage= (round(data_merged2$Deaths/sum(data_merged2$Deaths),digits = 4))*100
+data_merged2$Death_Perct= (round(data_merged2$Deaths/sum(data_merged2$Deaths),digits = 4))*100
 
-data_merged_death_pr = data_merged2[1:5,c("Country","Death_Percentage")]
+data_merged_death_pr = data_merged2[1:5,c("Country","Death_Perct")]
 
-data_merged_death_pr$Death_Percentage = sprintf("%3g%%", data_merged_death_pr$Death_Percentage)
+data_merged_death_pr$Death_Perct = sprintf("%3g%%", data_merged_death_pr$Death_Perct)
 
 data_merged_death_pr
 
 
 #------------------- Total deaths delta----------------#
 
-data_merged_deaths_delta_total = sum(data_merged2$Deaths_Increase)
+data_merged_deaths_delta_total = sum(data_merged2$Deaths_Incs)
 
 data_merged_deaths_delta_total
 
@@ -200,10 +200,10 @@ data_merged_deaths_delta_total
 #------------------- Top 5 countries deaths delta no.----------------#
 
 
-data_merged2 = arrange(data_merged2, desc(Deaths_Increase))
+data_merged2 = arrange(data_merged2, desc(Deaths_Incs))
 
 
-data_merged_deaths_delta_no = data_merged2[1:5,c("Country","Deaths_Increase")]
+data_merged_deaths_delta_no = data_merged2[1:5,c("Country","Deaths_Incs")]
 
 
 data_merged_deaths_delta_no
@@ -211,13 +211,13 @@ data_merged_deaths_delta_no
 
 #------------------- Top 5 countries deaths delta percentage.----------------#
 
-data_merged2$Deaths_Increase_Perct = round(data_merged2$Deaths_Increase/(sum(data_merged$Deaths_Increase))*100,digits = 2)
+data_merged2$Deaths_Incs_Perct = round(data_merged2$Deaths_Incs/(sum(data_merged$Deaths_Incs))*100,digits = 2)
 
 
-data_merged_deaths_inc_per = data_merged2[1:5,c("Country","Deaths_Increase_Perct")]
+data_merged_deaths_inc_per = data_merged2[1:5,c("Country","Deaths_Incs_Perct")]
 
 
-data_merged_deaths_inc_per$Deaths_Increase_Perct   = sprintf("%3g%%",data_merged_deaths_inc_per$Deaths_Increase_Perct)
+data_merged_deaths_inc_per$Deaths_Incs_Perct   = sprintf("%3g%%",data_merged_deaths_inc_per$Deaths_Incs_Perct)
 
 data_merged_deaths_inc_per
 
@@ -248,18 +248,18 @@ data_merged_recovered_no
 #------------ Top 5 Countries Recovered Cases Percentage.------------#
 
 
-data_merged5$Recovered_Percentage= (round(data_merged5$Recovered/sum(data_merged5$Recovered),digits = 4))*100
+data_merged5$Recovered_Perct= (round(data_merged5$Recovered/sum(data_merged5$Recovered),digits = 4))*100
 
-data_merged_Recovered_pr = data_merged5[1:5,c("Country","Recovered_Percentage")]
+data_merged_Recovered_pr = data_merged5[1:5,c("Country","Recovered_Perct")]
 
-data_merged_Recovered_pr$Recovered_Percentage = sprintf("%3g%%", data_merged_Recovered_pr$Recovered_Percentage)
+data_merged_Recovered_pr$Recovered_Perct = sprintf("%3g%%", data_merged_Recovered_pr$Recovered_Perct)
 
 data_merged_Recovered_pr
 
 
 #------------------- Total Recovered delta----------------#
 
-data_merged_recovered_delta_total = sum(data_merged5$Recovered_Increase)
+data_merged_recovered_delta_total = sum(data_merged5$Recovered_Incs)
 
 data_merged_recovered_delta_total
 
@@ -267,10 +267,10 @@ data_merged_recovered_delta_total
 #------------------- Top 5 countries Recovered delta no.----------------#
 
 
-data_merged5 = arrange(data_merged5, desc(Recovered_Increase))
+data_merged5 = arrange(data_merged5, desc(Recovered_Incs))
 
 
-data_merged_recovered_delta_no = data_merged5[1:5,c("Country","Recovered_Increase")]
+data_merged_recovered_delta_no = data_merged5[1:5,c("Country","Recovered_Incs")]
 
 
 data_merged_recovered_delta_no
@@ -278,13 +278,13 @@ data_merged_recovered_delta_no
 
 #------------------- Top 5 countries Recovered delta percentage.----------------#
 
-data_merged5$Recovered_Increase_Perct = round(data_merged5$Recovered_Increase/(sum(data_merged$Recovered_Increase))*100,digits = 2)
+data_merged5$Recovered_Incs_Perct = round(data_merged5$Recovered_Incs/(sum(data_merged$Recovered_Incs))*100,digits = 2)
 
 
-data_merged_recovered_inc_per = data_merged5[1:5,c("Country","Recovered_Increase_Perct")]
+data_merged_recovered_inc_per = data_merged5[1:5,c("Country","Recovered_Incs_Perct")]
 
 
-data_merged_recovered_inc_per$Recovered_Increase_Perct   = sprintf("%3g%%",data_merged_recovered_inc_per$Recovered_Increase_Perct)
+data_merged_recovered_inc_per$Recovered_Incs_Perct   = sprintf("%3g%%",data_merged_recovered_inc_per$Recovered_Incs_Perct)
 
 data_merged_recovered_inc_per
 
@@ -314,11 +314,11 @@ data_merged_active_no
 #------------ Top 5 Countries Recovered Cases Percentage.------------#
 
 
-data_merged6$Active_Percentage= (round(data_merged6$Active/sum(data_merged6$Active),digits = 4))*100
+data_merged6$Active_Perct= (round(data_merged6$Active/sum(data_merged6$Active),digits = 4))*100
 
-data_merged_Active_pr = data_merged6[1:5,c("Country","Active_Percentage")]
+data_merged_Active_pr = data_merged6[1:5,c("Country","Active_Perct")]
 
-data_merged_Active_pr$Active_Percentage = sprintf("%3g%%", data_merged_Active_pr$Active_Percentage)
+data_merged_Active_pr$Active_Perct = sprintf("%3g%%", data_merged_Active_pr$Active_Perct)
 
 data_merged_Active_pr
 
@@ -327,7 +327,9 @@ data_merged_Active_pr
 
 #Overall %
 
-Mortality_Overall = round(total_death/(total_confirmed)*100,digits = 2)
+
+
+Mortality_Overall = round(sum(data_merged$Deaths)/(sum(data_merged$Confirmed))*100,digits = 2)
 
 Mortality_Overall = sprintf("%3g%%",Mortality_Overall)
 
@@ -339,16 +341,17 @@ Mortality_Overall
 
 data_merged4 = data_merged 
 
-data_merged4$Mortality_Pertcentage = round(data_merged4$Deaths/(data_merged4$Confirmed)*100,digits=2)
+data_merged4$Mortality_Perct = round(data_merged4$Deaths/(data_merged4$Confirmed)*100,digits=2)
                 
 
-data_merged4= arrange(data_merged4, desc(data_merged4$Mortality_Pertcentage))
+data_merged4= arrange(data_merged4, desc(data_merged4$Mortality_Perct))
                 
-Mortality_countrywise = data_merged4[,c("Country","Mortality_Pertcentage")]                
+Mortality_countrywise = data_merged4[,c("Country","Mortality_Perct")]                
 
 Mortality_countrywise = filter(Mortality_countrywise, Country =="India"|Country == "China"| Country =="USA" |Country=="Spain"|
                                  Country=="France"|Country =="Iran"|Country=="United Kingdom"|Country=="Italy")
 
+Mortality_countrywise$Mortality_Perct = sprintf("%3g%%", Mortality_countrywise$Mortality_Perct)
 Mortality_countrywise
 
 #-------------------------------------------------- Shiny Dashboard -------------------------------------------#
@@ -396,33 +399,50 @@ sidebar = dashboardSidebar(width = 160,
     ))
 
 
-
-
 body = dashboardBody(tabItems(
   tabItem(tabName = "worldstats",
   fluidRow(
     box(title = "Total Confirmed", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;", textOutput("total_confirmed")),
     box(title = "Total Deaths", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("total_death")),
-    box(title = "Total Confirmed Increase/Day", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("total_confirmed_inc")),
-    box(title = "Total Deaths Increase/Day", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("total_death_inc"))
+    box(title = "Total Recovered", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("total_recovered")),
+    box(title = "Total Active", background= "purple",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("total_active"))
     ),
   
-  fluidRow(
-    box(title = "Top5 Countries Confirmed (Nos)", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5confirmedno")),      
-    box(title = "Top5 Countries Deaths (Nos)", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5deathsno")),
-    box(title = "Top5 Countries Confirmed Incs (Nos)", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5confirmedno_delta")),
-    box(title = "Top5 Countries Deaths Incs (Nos)", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5deathsno_delta"))
-  ),
   
-  fluidRow(
-    box(title = "Top5 Countries Confirmed (%)", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5confirmedper")),       
-    box(title = "Top5 Countries Deaths (%)", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5deathsper")),
-    box(title = "Top5 Countries Deaths Incs (%)", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5confirmedper_delta")),
-    box(title = "Top5 Countries Deaths Incs (%)", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5deathsper_delta"))   
-)),
+   fluidRow(
+    box(title = "Total Confirmed Increase/Day", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("total_confirmed_inc")),
+    box(title = "Total Deaths Increase/Day", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("total_death_inc")),
+    box(title = "Total Recovered Increase/Day", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("total_recovered_inc"))
+    
+ ),  
+ 
+ fluidRow(
+   
+  box(title = "Mortality %", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("mortality_overall"))
+ ) 
+),
 
-tabItem(tabName = "indiastats", c("xcmfkf"))
 
+
+#------------------ new tab starts----------------------#
+
+
+
+tabItem(tabName = "indiastats", 
+        fluidRow(
+          box(title = "Top5 Countries Confirmed (Nos)", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5confirmedno")),
+          box(title = "Top5 Countries Deaths (Nos)", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5deathsno")),
+          box(title = "Top5 Countries Confirmed Incs (Nos)", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5confirmedno_delta")),
+          box(title = "Top5 Countries Deaths Incs (Nos)", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5deathsno_delta"))
+        ),
+        
+        fluidRow(
+          box(title = "Top5 Countries Confirmed (%)", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5confirmedper")),       
+          box(title = "Top5 Countries Deaths (%)", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5deathsper")),
+          box(title = "Top5 Countries Deaths Incs (%)", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5confirmedper_delta")),
+          box(title = "Top5 Countries Deaths Incs (%)", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5deathsper_delta"))   
+        ) 
+)
 )
 )
 
@@ -437,8 +457,13 @@ shinyApp(ui = ui, server = function(input, output) {
   
   output$total_confirmed = renderText(total_confirmed)
   output$total_death = renderText(total_death)
+  output$total_recovered = renderText(total_recovered)
+  output$total_active = renderText(total_active)
   output$total_confirmed_inc = renderText(data_merged_conf_delta_total)
   output$total_death_inc = renderText(data_merged_deaths_delta_total)
+  output$total_recovered_inc = renderText(data_merged_recovered_delta_total)
+  output$mortality_overall = renderText(Mortality_Overall)
+  
   output$top5confirmedno = renderTable(data_merged_conf_no, digits = 0)
   output$top5deathsno = renderTable(data_merged_deaths_no,digits = 0)
   output$top5confirmedno_delta = renderTable(data_merged_conf_delta_no,digits = 0)

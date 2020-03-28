@@ -213,14 +213,83 @@ data_merged_deaths_inc_per
 
 #---------------------------------------------------------Deaths Cases Ends----------------------------------#
 
+#-------------------------------------Mortality %-----------------------------#
+
+#Overall %
+
+Mortality_Overall = round(total_death/(total_confirmed)*100,digits = 2)
+
+Mortality_Overall = sprintf("%3g%%",Mortality_Overall)
+
+Mortality_Overall 
+
+
+# Country Specific
+
+
+data_merged4 = data_merged 
+
+data_merged4$Mortality_Pertcentage = round(data_merged4$Deaths/(data_merged4$Confirmed)*100,digits=2)
+                
+
+data_merged4= arrange(data_merged4, desc(data_merged4$Mortality_Pertcentage))
+                
+Mortality_countrywise = data_merged4[,c("Country","Mortality_Pertcentage")]                
+
+Mortality_countrywise = filter(Mortality_countrywise, Country =="India"|Country == "China"| Country =="USA" |Country=="Spain"|
+                                 Country=="France"|Country =="Iran"|Country=="United Kingdom"|Country=="Italy")
+
+Mortality_countrywise
 
 #-------------------------------------------------- Shiny Dashboard -------------------------------------------#
 
 library(shiny)
 library(shinydashboard)
 library(DT)
+
+
+
+sidebar <- dashboardSidebar(
+  sidebarMenu(
+    menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
+    menuItem("Widgets", icon = icon("th"), tabName = "widgets",
+             badgeLabel = "new", badgeColor = "green")
+  )
+)
+
+body <- dashboardBody(
+  tabItems(
+    tabItem(tabName = "dashboard",
+            h2("Dashboard tab content")
+    ),
+    
+    tabItem(tabName = "widgets",
+            h2("Widgets tab content")
+    )
+  )
+)
+
+# Put them together into a dashboardPage
+dashboardPage(
+  dashboardHeader(title = "Simple tabs"),
+  sidebar,
+  body
+)
+
+
+
   
-body = dashboardBody(
+sidebar = dashboardSidebar(width = 160,
+  sidebarMenu(
+    menuItem("World Stats", tabName = "worldstats", icon = icon("analysis")),
+    menuItem("Increased Cases", tabName = "indiastats", icon = icon("increasedcases"))
+    ))
+
+
+
+
+body = dashboardBody(tabItems(
+  tabItem(tabName = "worldstats",
   fluidRow(
     box(title = "Total Confirmed", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;", textOutput("total_confirmed")),
     box(title = "Total Deaths", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("total_death")),
@@ -239,14 +308,17 @@ body = dashboardBody(
     box(title = "Top5 Countries Confirmed (%)", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5confirmedper")),       
     box(title = "Top5 Countries Deaths (%)", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5deathsper")),
     box(title = "Top5 Countries Deaths Incs (%)", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5confirmedper_delta")),
-    box(title = "Top5 Countries Deaths Incs (%)", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5deathsper_delta"))
+    box(title = "Top5 Countries Deaths Incs (%)", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5deathsper_delta"))   
+)),
+
+tabItem(tabName = "indiastats", c("xcmfkf"))
+
 )
 )
 
-
-ui <- dashboardPage(
+ui <- dashboardPage(skin = "green",
   dashboardHeader(title = span("Coronavirus Status Dashboard",style = "font-family: Tahoma; font-weight: bold"),titleWidth = 1500),
-  dashboardSidebar(disable = T),
+  sidebar,
   body
 )
 

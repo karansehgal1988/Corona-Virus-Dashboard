@@ -74,7 +74,6 @@ data_merged$Active.x[is.na(data_merged$Active.x)] = 0
 data_merged$Active.y[is.na(data_merged$Active.y)] = 0
 #-------------------- Renaming of the Variables------------------#
 
-colnames(data_merged)
 
 data_merged = rename(data_merged, Confirmed = Confirmed.x, Deaths = Deaths.x,Recovered = Recovered.x, Active = Active.x,
                      Confirmed_Incs = Confirmed_delta, Deaths_Incs = Deaths_delta,
@@ -108,14 +107,14 @@ data_merged_conf_no
 #------------ Top 5 Countries Confirmed Cases percentage.------------#
 
 
-data_merged3$Confirmed_Percentage = (round(data_merged3$Confirmed/sum(data_merged3$Confirmed),digits = 4))*100
+data_merged3$Confirmed_Perct = (round(data_merged3$Confirmed/sum(data_merged3$Confirmed),digits = 4))*100
 
 
-data_merged_conf_pr = data_merged3[1:5,c("Country","Confirmed_Percentage")]
+data_merged_conf_pr = data_merged3[1:5,c("Country","Confirmed_Perct")]
 
 
 
-data_merged_conf_pr$Confirmed_Percentage = sprintf("%3g%%", data_merged_conf_pr$Confirmed_Percentage)
+data_merged_conf_pr$Confirmed_Perct = sprintf("%3g%%", data_merged_conf_pr$Confirmed_Perct)
 
 data_merged_conf_pr
 
@@ -354,6 +353,27 @@ Mortality_countrywise = filter(Mortality_countrywise, Country =="India"|Country 
 Mortality_countrywise$Mortality_Perct = sprintf("%3g%%", Mortality_countrywise$Mortality_Perct)
 Mortality_countrywise
 
+
+#----------------------------------------- India Analytics-----------------------------#
+
+
+data4 = filter(data2, Country=="India")
+
+data5 = filter(data3, Country=="India")
+
+
+Indian_Confirmed = data4[,"Confirmed"]
+Indian_Deaths = data4[,"Deaths"]
+Indian_Recovered = data4[,"Recovered"]
+Indian_Active = Indian_Confirmed - (Indian_Deaths+Indian_Recovered)
+
+Indian_Confirmed_Increase = data4$Confirmed - data5$Confirmed
+Indian_Deaths_Increase = data4$Deaths - data5$Deaths
+Indian_Recovered_Increase = data4$Recovered - data5$Recovered
+
+Indian_Mortality = round((data4$Deaths/data4$Confirmed)*100,digits = 2)
+Indian_Mortality = sprintf("%3g%%", Indian_Mortality)
+
 #-------------------------------------------------- Shiny Dashboard -------------------------------------------#
 
 library(shiny)
@@ -362,44 +382,19 @@ library(DT)
 
 
 
-sidebar <- dashboardSidebar(
-  sidebarMenu(
-    menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
-    menuItem("Widgets", icon = icon("th"), tabName = "widgets",
-             badgeLabel = "new", badgeColor = "green")
-  )
-)
-
-body <- dashboardBody(
-  tabItems(
-    tabItem(tabName = "dashboard",
-            h2("Dashboard tab content")
-    ),
-    
-    tabItem(tabName = "widgets",
-            h2("Widgets tab content")
-    )
-  )
-)
-
-# Put them together into a dashboardPage
-dashboardPage(
-  dashboardHeader(title = "Simple tabs"),
-  sidebar,
-  body
-)
-
-
-
-  
 sidebar = dashboardSidebar(width = 160,
   sidebarMenu(
-    menuItem("World Stats", tabName = "worldstats", icon = icon("analysis")),
-    menuItem("Increased Cases", tabName = "indiastats", icon = icon("increasedcases"))
-    ))
+    menuItem("World", tabName = "worldstats", badgeColor = "red", icon = icon("list-alt")),
+    menuItem("Top5 Countries", tabName = "top5", badgeColor = "red", icon = icon("table")),
+    menuItem("Indian", tabName = "indianstats", badgeColor = "red", icon = icon("list-alt"))
+    )
+    )
 
 
 body = dashboardBody(tabItems(
+  
+  #-------------------------------------------------------Tab1 Starts----------------------------------------------------#
+  
   tabItem(tabName = "worldstats",
   fluidRow(
     box(title = "Total Confirmed", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;", textOutput("total_confirmed")),
@@ -408,27 +403,20 @@ body = dashboardBody(tabItems(
     box(title = "Total Active", background= "purple",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("total_active"))
     ),
   
-  
    fluidRow(
-    box(title = "Total Confirmed Increase/Day", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("total_confirmed_inc")),
-    box(title = "Total Deaths Increase/Day", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("total_death_inc")),
-    box(title = "Total Recovered Increase/Day", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("total_recovered_inc"))
-    
- ),  
+    box(title = "Confirmed Increase/Day", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("total_confirmed_inc")),
+    box(title = "Deaths Increase/Day", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("total_death_inc")),
+    box(title = "Recovered Increase/Day", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("total_recovered_inc"))
+    ),  
  
  fluidRow(
-   
-  box(title = "Mortality %", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("mortality_overall"))
- ) 
+ box(title = "Mortality %", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("mortality_overall"))
+) 
 ),
 
+#-------------------------------------------------------Tab2 Starts----------------------------------------------------#
 
-
-#------------------ new tab starts----------------------#
-
-
-
-tabItem(tabName = "indiastats", 
+tabItem(tabName = "top5", 
         fluidRow(
           box(title = "Top5 Countries Confirmed (Nos)", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5confirmedno")),
           box(title = "Top5 Countries Deaths (Nos)", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5deathsno")),
@@ -442,18 +430,43 @@ tabItem(tabName = "indiastats",
           box(title = "Top5 Countries Deaths Incs (%)", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5confirmedper_delta")),
           box(title = "Top5 Countries Deaths Incs (%)", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5deathsper_delta"))   
         ) 
-)
+        ),
+
+#-------------------------------------------------------Tab3 Starts----------------------------------------------------#
+
+tabItem(tabName = "indianstats", 
+        fluidRow(
+          box(title = "Indian Confirmed", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("indianconfirmed")),
+          box(title = "Indian Deaths", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("indiandeaths")),
+          box(title = "Indian Recovered", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("indianrecovered")),
+          box(title = "Indian Active", background= "purple",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("indianactive"))
+        ),
+        
+        fluidRow(
+          box(title = "Confirmed Increase/Day", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("indianconfirmed_inc")),
+          box(title = "Deaths Increase/Day", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("indiandeaths_inc")),
+          box(title = "Recovered Increase/Day", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("indianrecovered_inc"))
+          
+        ),
+        
+        fluidRow(
+          box(title = "Mortality %", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("indianmortality"))
+        )
+        )  
+
 )
 )
 
-ui <- dashboardPage(skin = "green",
-  dashboardHeader(title = span("Coronavirus Status Dashboard (Data Updated till March 27th,2020 / Data Source - John Hopkins University)",style = "font-family: Tahoma; font-weight: bold"),titleWidth = 1500),
+ui <- dashboardPage(skin = "purple",
+  dashboardHeader(title = span("Coronavirus Status Dashboard (Data Updated till 28th March 2020 / Data Source - John Hopkins University)",style = "font-family: Tahoma; font-weight: bold"),titleWidth = 1500),
   sidebar,
   body
 )
 
 # Preview the UI in the console
 shinyApp(ui = ui, server = function(input, output) { 
+  
+  #-------------------------- For 1st tab ------------------------------#
   
   output$total_confirmed = renderText(total_confirmed)
   output$total_death = renderText(total_death)
@@ -464,6 +477,8 @@ shinyApp(ui = ui, server = function(input, output) {
   output$total_recovered_inc = renderText(data_merged_recovered_delta_total)
   output$mortality_overall = renderText(Mortality_Overall)
   
+  #------------------------------- For 2nd tab-----------------------------#
+  
   output$top5confirmedno = renderTable(data_merged_conf_no, digits = 0)
   output$top5deathsno = renderTable(data_merged_deaths_no,digits = 0)
   output$top5confirmedno_delta = renderTable(data_merged_conf_delta_no,digits = 0)
@@ -472,9 +487,19 @@ shinyApp(ui = ui, server = function(input, output) {
   output$top5deathsper = renderTable(data_merged_death_pr)
   output$top5confirmedper_delta = renderTable(data_merged_conf_pr)
   output$top5deathsper_delta = renderTable(data_merged_conf_inc_per)
+  
+  #-------------------------- For 3rd tab ------------------------------#
+  
+  output$indianconfirmed = renderText(Indian_Confirmed)
+  output$indiandeaths = renderText(Indian_Deaths)
+  output$indianrecovered = renderText(Indian_Recovered)
+  output$indianactive = renderText(Indian_Active)
+  output$indianconfirmed_inc = renderText(Indian_Confirmed_Increase)
+  output$indiandeaths_inc = renderText(Indian_Deaths_Increase)
+  output$indianrecovered_inc = renderText(Indian_Recovered_Increase)
+  output$indianmortality = renderText(Indian_Mortality)
+  
    })
 
 #-------------------------------------------------- End of Shiny Dashboard -------------------------------------------#
-
-
 

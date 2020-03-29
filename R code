@@ -102,6 +102,8 @@ data_merged3 = arrange(data_merged3, desc(Confirmed))
 
 data_merged_conf_no = data_merged3[1:5,c("Country","Confirmed")]
 
+data_merged_conf_no$Confirmed = comma(data_merged_conf_no$Confirmed)
+
 data_merged_conf_no
 
 #------------ Top 5 Countries Confirmed Cases percentage.------------#
@@ -123,6 +125,8 @@ data_merged_conf_pr
 
 data_merged_conf_delta_total = sum(data_merged3$Confirmed_Incs)
 
+data_merged_conf_delta_total = comma(data_merged_conf_delta_total)
+
 data_merged_conf_delta_total
 
 #------------------- Top 5 countries Confirmed delta no.----------------#
@@ -134,8 +138,9 @@ data_merged3 = arrange(data_merged3, desc(Confirmed_Incs))
 data_merged_conf_delta_no = data_merged3[1:5,c("Country","Confirmed_Incs")]
 
 
-data_merged_conf_delta_no
+data_merged_conf_delta_no$Confirmed_Incs = comma(data_merged_conf_delta_no$Confirmed_Incs)
 
+data_merged_conf_delta_no
 
 #------------------- Top 5 countries Confirmed delta percentage.----------------#
 
@@ -175,6 +180,8 @@ data_merged2 = arrange(data_merged2, desc(Deaths))
 
 data_merged_deaths_no = data_merged2[1:5,c("Country","Deaths")]
 
+data_merged_deaths_no$Deaths = comma(data_merged_deaths_no$Deaths)
+
 data_merged_deaths_no
 
 #------------ Top 5 Countries Deaths Cases Percentage.------------#
@@ -193,8 +200,9 @@ data_merged_death_pr
 
 data_merged_deaths_delta_total = sum(data_merged2$Deaths_Incs)
 
-data_merged_deaths_delta_total
+data_merged_deaths_delta_total = comma(data_merged_deaths_delta_total)
 
+data_merged_deaths_delta_total
 
 #------------------- Top 5 countries deaths delta no.----------------#
 
@@ -205,8 +213,9 @@ data_merged2 = arrange(data_merged2, desc(Deaths_Incs))
 data_merged_deaths_delta_no = data_merged2[1:5,c("Country","Deaths_Incs")]
 
 
-data_merged_deaths_delta_no
+data_merged_deaths_delta_no$Deaths_Incs = comma(data_merged_deaths_delta_no$Deaths_Incs)
 
+data_merged_deaths_delta_no
 
 #------------------- Top 5 countries deaths delta percentage.----------------#
 
@@ -242,6 +251,8 @@ data_merged5 = arrange(data_merged5, desc(Recovered))
 
 data_merged_recovered_no = data_merged5[1:5,c("Country","Recovered")]
 
+data_merged_recovered_no$Recovered = comma(data_merged_recovered_no$Recovered)
+
 data_merged_recovered_no
 
 #------------ Top 5 Countries Recovered Cases Percentage.------------#
@@ -260,8 +271,9 @@ data_merged_Recovered_pr
 
 data_merged_recovered_delta_total = sum(data_merged5$Recovered_Incs)
 
-data_merged_recovered_delta_total
+data_merged_recovered_delta_total = comma(data_merged_recovered_delta_total)
 
+data_merged_recovered_delta_total
 
 #------------------- Top 5 countries Recovered delta no.----------------#
 
@@ -271,6 +283,8 @@ data_merged5 = arrange(data_merged5, desc(Recovered_Incs))
 
 data_merged_recovered_delta_no = data_merged5[1:5,c("Country","Recovered_Incs")]
 
+
+data_merged_recovered_delta_no$Recovered_Incs = comma(data_merged_recovered_delta_no$Recovered_Incs)
 
 data_merged_recovered_delta_no
 
@@ -307,6 +321,8 @@ data_merged6 = arrange(data_merged6, desc(Active))
 
 
 data_merged_active_no = data_merged6[1:5,c("Country","Active")]
+
+data_merged_active_no$Active = comma(data_merged_active_no$Active)
 
 data_merged_active_no
 
@@ -363,13 +379,35 @@ data5 = filter(data3, Country=="India")
 
 
 Indian_Confirmed = data4[,"Confirmed"]
+
+Indian_Confirmed = comma(Indian_Confirmed)
+
+
 Indian_Deaths = data4[,"Deaths"]
+
+Indian_Deaths = comma(Indian_Deaths)
+
+
 Indian_Recovered = data4[,"Recovered"]
-Indian_Active = Indian_Confirmed - (Indian_Deaths+Indian_Recovered)
+
+Indian_Recovered = comma(Indian_Recovered)
+
+Indian_Active = data4$Confirmed - (data4$Recovered+data4$Deaths)
+
+Indian_Active = comma(Indian_Active)
 
 Indian_Confirmed_Increase = data4$Confirmed - data5$Confirmed
+
+Indian_Confirmed_Increase = comma(Indian_Confirmed_Increase)
+
 Indian_Deaths_Increase = data4$Deaths - data5$Deaths
+
+Indian_Deaths_Increase = comma(Indian_Deaths_Increase)
+
 Indian_Recovered_Increase = data4$Recovered - data5$Recovered
+
+Indian_Recovered_Increase = comma(Indian_Recovered_Increase)
+
 
 Indian_Mortality = round((data4$Deaths/data4$Confirmed)*100,digits = 2)
 Indian_Mortality = sprintf("%3g%%", Indian_Mortality)

@@ -496,7 +496,7 @@ tabItem(tabName = "indianstats",
 )
 
 ui <- dashboardPage(skin = "purple",
-  dashboardHeader(title = span("Coronavirus Status Dashboard (Data Updated till 28th March 2020 / Data Source - John Hopkins University)",style = "font-family: Tahoma; font-weight: bold"),titleWidth = 1500),
+  dashboardHeader(title = span("Coronavirus Status Dashboard (Data Updated till 29th March 2020 / Data Source - John Hopkins University)",style = "font-family: Tahoma; font-weight: bold"),titleWidth = 1500),
   sidebar,
   body
 )
@@ -523,8 +523,8 @@ shinyApp(ui = ui, server = function(input, output) {
   output$top5deathsno_delta = renderTable(data_merged_deaths_delta_no,digits = 0)
   output$top5confirmedper = renderTable(data_merged_conf_pr)
   output$top5deathsper = renderTable(data_merged_death_pr)
-  output$top5confirmedper_delta = renderTable(data_merged_conf_pr)
-  output$top5deathsper_delta = renderTable(data_merged_conf_inc_per)
+  output$top5confirmedper_delta = renderTable(data_merged_conf_inc_per)
+  output$top5deathsper_delta = renderTable(data_merged_deaths_inc_per)
   
   #-------------------------- For 3rd tab ------------------------------#
   

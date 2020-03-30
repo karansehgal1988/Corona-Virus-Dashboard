@@ -420,11 +420,11 @@ library(DT)
 
 
 
-sidebar = dashboardSidebar(width = 160,
+sidebar = dashboardSidebar(width = 170,
   sidebarMenu(
-    menuItem("World", tabName = "worldstats", badgeColor = "red", icon = icon("list-alt")),
-    menuItem("Top5 Countries", tabName = "top5", badgeColor = "red", icon = icon("table")),
-    menuItem("Indian", tabName = "indianstats", badgeColor = "red", icon = icon("list-alt"))
+    menuItem("Global View", tabName = "worldstats", icon = icon("list-alt"),badgeLabel = "New",  badgeColor = "green"),
+    menuItem("Top5 Countries View", tabName = "top5",icon = icon("table")),
+    menuItem("India View", tabName = "indianstats", icon = icon("list-alt"),badgeLabel = "New", badgeColor = "green")
     )
     )
 

@@ -414,59 +414,153 @@ Indian_Mortality = sprintf("%3g%%", Indian_Mortality)
 
 
 #--------------------------------------------- Forecasting ----------------------------------#
-
-#US plot
-
-
 library(prophet)
 library(dplyr)
 
 
-data6 = filter(data1, Country=="US")
+#------------------------ Forecasting World Plot----------------------------#
+
+# World Confirmed Case
+
+data6 = data1%>%group_by(Date)%>%summarise(confirmed = sum(Confirmed),deaths=sum(Deaths),recovered = sum(Recovered))
 
 data6 = arrange(data6,Date)
 
 ds = data6[,c("Date")] 
-y = data6[,c("Confirmed")] 
+y = data6[,c("confirmed")] 
+
+df1 = data.frame(ds,y)
+df1 = rename(df1, ds = Date, y = confirmed)
+
+model1 = prophet(df1, yearly.seasonality = T,daily.seasonality = T,weekly.seasonality = T)
+
+future1 <- make_future_dataframe(model1, periods = 5)
+forecast1 <- predict(model1, future1)
+
+plot1 = plot(model1,forecast1,xlab = "Date", ylab = "No. of Confirmed Cases")
+plot1 # World Confirmed Case
 
 
-df = data.frame(ds,y)
+# World Deaths Case
 
-model = prophet(df,yearly.seasonality = T,daily.seasonality = T,weekly.seasonality = T)
-
-future <- make_future_dataframe(model, periods = 6)
-
-
-forecast <- predict(model, future)
-
-
-plot = plot(model,forecast, main = "Forecasting of Confirmed Cases", xlab = "Date", ylab = "No. of Confirmed Cases")
-plot
-
-#Indian Plot
-
-
-data7 = filter(data1, Country=="India")
+data7 = data1%>%group_by(Date)%>%summarise(confirmed = sum(Confirmed),deaths=sum(Deaths),recovered = sum(Recovered))
 
 data7 = arrange(data7,Date)
 
-ds = data7[,c("Date")] 
-y = data7[,c("Confirmed")] 
+ds = data6[,c("Date")] 
+y = data6[,c("deaths")] 
+
+df2 = data.frame(ds,y)
+df2= rename(df2, ds = Date, y = deaths)
+
+model2 = prophet(df2, yearly.seasonality = T,daily.seasonality = T,weekly.seasonality = T)
+
+future2 <- make_future_dataframe(model2, periods = 5)
+forecast2 <- predict(model2, future2)
 
 
-df1 = data.frame(ds,y)
-
-model1 = prophet(df1,yearly.seasonality = F,daily.seasonality = T,weekly.seasonality = T)
-
-future1 <- make_future_dataframe(model1, periods = 7)
+plot2 = plot(model2,forecast2,xlab = "Date", ylab = "No. of Deaths Cases")
+plot2 # World Deaths Case
 
 
-forecast1 <- predict(model1, future1)
+#Indian Confirmed Case
 
-plot1 = plot(model1,forecast1, main = "Forecasting of Confirmed Cases", xlab = "Date", ylab = "No. of Confirmed Cases")
+data8 = filter(data1, Country=="India")
 
-plot1
-#World Plot
+data8 = arrange(data8,Date)
+
+ds = data8[,c("Date")] 
+y = data8[,c("Confirmed")] 
+
+
+df3 = data.frame(ds,y)
+
+model3 = prophet(df3,yearly.seasonality = T,daily.seasonality = T,weekly.seasonality = T,growth = "linear")
+
+future3 <- make_future_dataframe(model3, periods = 5)
+
+
+forecast3 <- predict(model3, future3)
+
+plot3 = plot(model3,forecast3, xlab = "Date", ylab = "No. of Confirmed Cases")
+
+plot3 # Indian Confirmed Case
+
+
+#Indian Deaths Case
+
+data9 = filter(data1, Country=="India")
+
+data9 = arrange(data9,Date)
+
+ds = data9[,c("Date")] 
+y = data9[,c("Deaths")] 
+
+
+df4 = data.frame(ds,y)
+
+model4 = prophet(df4,yearly.seasonality = T,daily.seasonality = T,weekly.seasonality = T)
+
+future4 <- make_future_dataframe(model4, periods = 5)
+
+
+forecast4 <- predict(model4, future4)
+
+plot4 = plot(model4,forecast4, xlab = "Date", ylab = "No. of Confirmed Cases")
+
+plot4 # Indian Deaths Case
+
+
+
+#US plot
+
+#US Confirmed Case
+
+data9 = filter(data1, Country=="US")
+
+data9 = arrange(data9,Date)
+
+ds = data9[,c("Date")] 
+y = data9[,c("Confirmed")] 
+
+
+df5 = data.frame(ds,y)
+
+model5 = prophet(df5,yearly.seasonality = T,daily.seasonality = T,weekly.seasonality = T)
+
+future5 <- make_future_dataframe(model5, periods = 5)
+
+
+forecast5 <- predict(model5, future5)
+
+
+plot5 = plot(model5,forecast5,xlab = "Date", ylab = "No. of Confirmed Cases")
+plot5 #US Confirmed Case
+
+
+
+#US Deaths Case
+
+data10 = filter(data1, Country=="US")
+
+data10 = arrange(data10,Date)
+
+ds = data9[,c("Date")] 
+y = data9[,c("Deaths")] 
+
+
+df6 = data.frame(ds,y)
+
+model6 = prophet(df6,yearly.seasonality = T,daily.seasonality = T,weekly.seasonality = T)
+
+future6 <- make_future_dataframe(model6, periods = 5)
+
+
+forecast6 <- predict(model6, future6)
+
+
+plot6 = plot(model6,forecast6,xlab = "Date", ylab = "No. of Deaths Cases")
+plot6 #US Deaths Case
 
 
 # -------------------------------------------------- Shiny Dashboard -------------------------------------------#

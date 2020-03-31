@@ -416,7 +416,7 @@ Indian_Mortality = sprintf("%3g%%", Indian_Mortality)
 #--------------------------------------------- Forecasting ----------------------------------#
 library(prophet)
 library(dplyr)
-
+library(ggplot2)
 
 #------------------------ Forecasting World Plot----------------------------#
 
@@ -437,7 +437,12 @@ model1 = prophet(df1, yearly.seasonality = T,daily.seasonality = T,weekly.season
 future1 <- make_future_dataframe(model1, periods = 5)
 forecast1 <- predict(model1, future1)
 
-plot1 = plot(model1,forecast1,xlab = "Date", ylab = "No. of Confirmed Cases")
+plot1 =   ggplot(forecast1) +
+  aes(x = ds, y = yhat) +
+  geom_line(size=1.25,colour = "#d8576b") +
+  labs(x = "No. of Days", y = "Number of Confirmed Cases", subtitle = "Forecasting for next 5 Days") +
+  ggthemes::theme_gdocs() +
+  theme(legend.position = "none")
 plot1 # World Confirmed Case
 
 
@@ -459,7 +464,14 @@ future2 <- make_future_dataframe(model2, periods = 5)
 forecast2 <- predict(model2, future2)
 
 
-plot2 = plot(model2,forecast2,xlab = "Date", ylab = "No. of Deaths Cases")
+plot2 = ggplot(forecast2) +
+  aes(x = ds, y = yhat, size = yhat) +
+  geom_line(size = 1.25,colour = "#d8576b") +
+  labs(x = "No. of Days", y = "Number of Deaths Cases", subtitle = "Forecasting for next 5 Days") +
+  ggthemes::theme_gdocs()  +
+  theme(legend.position = "none")
+
+
 plot2 # World Deaths Case
 
 
@@ -475,14 +487,20 @@ y = data8[,c("Confirmed")]
 
 df3 = data.frame(ds,y)
 
-model3 = prophet(df3,yearly.seasonality = T,daily.seasonality = T,weekly.seasonality = T,growth = "linear")
+model3 = prophet(df3,yearly.seasonality = T,daily.seasonality = T,weekly.seasonality = T)
 
 future3 <- make_future_dataframe(model3, periods = 5)
 
 
 forecast3 <- predict(model3, future3)
 
-plot3 = plot(model3,forecast3, xlab = "Date", ylab = "No. of Confirmed Cases")
+plot3 = ggplot(forecast3) +
+  aes(x = ds, y = yhat, size = yhat) +
+  geom_line(size = 1.25, colour = "#d8576b") +
+  labs(x = "No. of Days", y = "Number of Confirmed Cases", subtitle = "Forecasting for next 5 Days") +
+  ggthemes::theme_gdocs() +
+  theme(legend.position = "none")
+
 
 plot3 # Indian Confirmed Case
 
@@ -506,7 +524,12 @@ future4 <- make_future_dataframe(model4, periods = 5)
 
 forecast4 <- predict(model4, future4)
 
-plot4 = plot(model4,forecast4, xlab = "Date", ylab = "No. of Confirmed Cases")
+plot4 = ggplot(forecast4) +
+  aes(x = ds, y = yhat, size = yhat) +
+  geom_line(size = 1.25, colour = "#d8576b") +
+  labs(x = "No. of Days", y = "Number of Deaths Cases", subtitle = "Forecasting for next 5 Days") +
+  ggthemes::theme_gdocs()  +
+  theme(legend.position = "none")
 
 plot4 # Indian Deaths Case
 
@@ -534,7 +557,13 @@ future5 <- make_future_dataframe(model5, periods = 5)
 forecast5 <- predict(model5, future5)
 
 
-plot5 = plot(model5,forecast5,xlab = "Date", ylab = "No. of Confirmed Cases")
+plot5 = ggplot(forecast5) +
+  aes(x = ds, y = yhat, size = yhat) +
+  geom_line(size = 1.25, colour = "#d8576b") +
+  labs(x = "No. of Days", y = "Number of Confirmed Cases", subtitle = "Forecasting for next 5 Days") +
+  ggthemes::theme_gdocs() +
+  theme(legend.position = "none")
+
 plot5 #US Confirmed Case
 
 
@@ -553,13 +582,18 @@ df6 = data.frame(ds,y)
 
 model6 = prophet(df6,yearly.seasonality = T,daily.seasonality = T,weekly.seasonality = T)
 
-future6 <- make_future_dataframe(model6, periods = 5)
+future6 <- make_future_dataframe(model6, periods = 6)
 
 
 forecast6 <- predict(model6, future6)
 
+plot6 = ggplot(forecast6) +
+  aes(x = ds, y = yhat, size = yhat) +
+  geom_line(size = 1.25, colour = "#d8576b") +
+  labs(x = "No. of Days", y = "Number of Death Cases", subtitle = "Forecasting for next 5 Days") +
+  ggthemes::theme_gdocs() +
+  theme(legend.position = "none")
 
-plot6 = plot(model6,forecast6,xlab = "Date", ylab = "No. of Deaths Cases")
 plot6 #US Deaths Case
 
 
@@ -575,7 +609,7 @@ sidebar = dashboardSidebar(width = 170,
   sidebarMenu(
     menuItem("Global View", tabName = "worldstats", icon = icon("list-alt"),badgeLabel = "New",  badgeColor = "green"),
     menuItem("Top5 Countries View", tabName = "top5",icon = icon("table")),
-    menuItem("India View", tabName = "indianstats", icon = icon("list-alt"),badgeLabel = "New", badgeColor = "green")
+    menuItem("Indian View", tabName = "indianstats", icon = icon("list-alt"),badgeLabel = "New", badgeColor = "green")
     )
     )
 
@@ -593,13 +627,15 @@ body = dashboardBody(tabItems(
     ),
   
    fluidRow(
-    box(title = "Confirmed Increase/Day", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("total_confirmed_inc")),
-    box(title = "Deaths Increase/Day", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("total_death_inc")),
-    box(title = "Recovered Increase/Day", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("total_recovered_inc"))
+    box(title = "Confirmed/Day", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("total_confirmed_inc")),
+    box(title = "Deaths/Day", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("total_death_inc")),
+    box(title = "Recovered/Day", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("total_recovered_inc")),
+    box(title = "Mortality %", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("mortality_overall"))
     ),  
  
  fluidRow(
- box(title = "Mortality %", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("mortality_overall"))
+ box(title = "Forecasting of Confirmed Cases", background= "orange",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("forecaseting_confirmed_ww")),
+ box(title = "Forecasting of Death Cases", background= "orange",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("forecaseting_deaths_ww"))
 ) 
 ),
 
@@ -632,14 +668,15 @@ tabItem(tabName = "indianstats",
         ),
         
         fluidRow(
-          box(title = "Confirmed Increase/Day", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("indianconfirmed_inc")),
-          box(title = "Deaths Increase/Day", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("indiandeaths_inc")),
-          box(title = "Recovered Increase/Day", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("indianrecovered_inc"))
-          
+          box(title = "Confirmed/Day", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("indianconfirmed_inc")),
+          box(title = "Deaths/Day", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("indiandeaths_inc")),
+          box(title = "Recovered/Day", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("indianrecovered_inc")),
+          box(title = "Mortality %", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("indianmortality"))
         ),
         
         fluidRow(
-          box(title = "Mortality %", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("indianmortality"))
+          box(title = "Forecasting of Confirmed Cases", background= "orange",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("forecaseting_confirmed_india")),
+          box(title = "Forecasting of Death Cases", background= "orange",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("forecaseting_deaths_india"))
         )
         )  
 
@@ -647,7 +684,7 @@ tabItem(tabName = "indianstats",
 )
 
 ui <- dashboardPage(skin = "purple",
-  dashboardHeader(title = span("Coronavirus Status Dashboard (Data Updated till 29th March 2020 / Data Source - John Hopkins University)",style = "font-family: Tahoma; font-weight: bold"),titleWidth = 1500),
+  dashboardHeader(title = span("Coronavirus Status Dashboard (Data Updated till 29th March 2020)",style = "font-family: Arial; font-weight: bold"),titleWidth = 1500),
   sidebar,
   body
 )
@@ -665,6 +702,8 @@ shinyApp(ui = ui, server = function(input, output) {
   output$total_death_inc = renderText(data_merged_deaths_delta_total)
   output$total_recovered_inc = renderText(data_merged_recovered_delta_total)
   output$mortality_overall = renderText(Mortality_Overall)
+  output$forecaseting_confirmed_ww = renderPlot(plot1)
+  output$forecaseting_deaths_ww = renderPlot(plot2)
   
   #------------------------------- For 2nd tab-----------------------------#
   
@@ -687,8 +726,11 @@ shinyApp(ui = ui, server = function(input, output) {
   output$indiandeaths_inc = renderText(Indian_Deaths_Increase)
   output$indianrecovered_inc = renderText(Indian_Recovered_Increase)
   output$indianmortality = renderText(Indian_Mortality)
+  output$forecaseting_confirmed_india = renderPlot(plot3)
+  output$forecaseting_deaths_india = renderPlot(plot4)
   
-   })
+  
+  })
 
 #-------------------------------------------------- End of Shiny Dashboard -------------------------------------------#
 

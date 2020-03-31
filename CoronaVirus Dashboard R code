@@ -412,7 +412,64 @@ Indian_Recovered_Increase = comma(Indian_Recovered_Increase)
 Indian_Mortality = round((data4$Deaths/data4$Confirmed)*100,digits = 2)
 Indian_Mortality = sprintf("%3g%%", Indian_Mortality)
 
-#-------------------------------------------------- Shiny Dashboard -------------------------------------------#
+
+#--------------------------------------------- Forecasting ----------------------------------#
+
+#US plot
+
+
+library(prophet)
+library(dplyr)
+
+
+data6 = filter(data1, Country=="US")
+
+data6 = arrange(data6,Date)
+
+ds = data6[,c("Date")] 
+y = data6[,c("Confirmed")] 
+
+
+df = data.frame(ds,y)
+
+model = prophet(df,yearly.seasonality = T,daily.seasonality = T,weekly.seasonality = T)
+
+future <- make_future_dataframe(model, periods = 6)
+
+
+forecast <- predict(model, future)
+
+
+plot = plot(model,forecast, main = "Forecasting of Confirmed Cases", xlab = "Date", ylab = "No. of Confirmed Cases")
+plot
+
+#Indian Plot
+
+
+data7 = filter(data1, Country=="India")
+
+data7 = arrange(data7,Date)
+
+ds = data7[,c("Date")] 
+y = data7[,c("Confirmed")] 
+
+
+df1 = data.frame(ds,y)
+
+model1 = prophet(df1,yearly.seasonality = F,daily.seasonality = T,weekly.seasonality = T)
+
+future1 <- make_future_dataframe(model1, periods = 7)
+
+
+forecast1 <- predict(model1, future1)
+
+plot1 = plot(model1,forecast1, main = "Forecasting of Confirmed Cases", xlab = "Date", ylab = "No. of Confirmed Cases")
+
+plot1
+#World Plot
+
+
+# -------------------------------------------------- Shiny Dashboard -------------------------------------------#
 
 library(shiny)
 library(shinydashboard)

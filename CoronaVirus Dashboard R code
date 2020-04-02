@@ -258,13 +258,13 @@ data_merged_recovered_no
 #------------ Top 5 Countries Recovered Cases Percentage.------------#
 
 
-data_merged5$Recovered_Perct= (round(data_merged5$Recovered/sum(data_merged5$Recovered),digits = 4))*100
+data_merged5$recovered_Perct= (round(data_merged5$Recovered/sum(data_merged5$Recovered),digits = 4))*100
 
-data_merged_Recovered_pr = data_merged5[1:5,c("Country","Recovered_Perct")]
+data_merged_recovered_pr = data_merged5[1:5,c("Country","recovered_Perct")]
 
-data_merged_Recovered_pr$Recovered_Perct = sprintf("%3g%%", data_merged_Recovered_pr$Recovered_Perct)
+data_merged_recovered_pr$Recovered_Perct = sprintf("%3g%%", data_merged_Recovered_pr$Recovered_Perct)
 
-data_merged_Recovered_pr
+data_merged_recovered_pr
 
 
 #------------------- Total Recovered delta----------------#
@@ -331,18 +331,16 @@ data_merged_active_no
 
 data_merged6$Active_Perct= (round(data_merged6$Active/sum(data_merged6$Active),digits = 4))*100
 
-data_merged_Active_pr = data_merged6[1:5,c("Country","Active_Perct")]
+data_merged_active_pr = data_merged6[1:5,c("Country","Active_Perct")]
 
-data_merged_Active_pr$Active_Perct = sprintf("%3g%%", data_merged_Active_pr$Active_Perct)
+data_merged_active_pr$Active_Perct = sprintf("%3g%%", data_merged_active_pr$Active_Perct)
 
-data_merged_Active_pr
+data_merged_active_pr
 
 
 #-------------------------------------Mortality %-----------------------------#
 
 #Overall %
-
-
 
 Mortality_Overall = round(sum(data_merged$Deaths)/(sum(data_merged$Confirmed))*100,digits = 2)
 
@@ -434,13 +432,13 @@ df1 = rename(df1, ds = Date, y = confirmed)
 
 model1 = prophet(df1, yearly.seasonality = T,daily.seasonality = T,weekly.seasonality = T)
 
-future1 <- make_future_dataframe(model1, periods = 5)
+future1 <- make_future_dataframe(model1, periods = 7)
 forecast1 <- predict(model1, future1)
 
 plot1 =   ggplot(forecast1) +
   aes(x = ds, y = yhat) +
   geom_line(size=1.25,colour = "#d8576b") +
-  labs(x = "No. of Days", y = "Number of Confirmed Cases", subtitle = "Forecasting for next 5 Days") +
+  labs(x = "No. of Days", y = "Number of Confirmed Cases", subtitle = "Forecasting for next 7 Days") +
   ggthemes::theme_gdocs() +
   theme(legend.position = "none")
 plot1 # World Confirmed Case
@@ -460,14 +458,14 @@ df2= rename(df2, ds = Date, y = deaths)
 
 model2 = prophet(df2, yearly.seasonality = T,daily.seasonality = T,weekly.seasonality = T)
 
-future2 <- make_future_dataframe(model2, periods = 5)
+future2 <- make_future_dataframe(model2, periods = 7)
 forecast2 <- predict(model2, future2)
 
 
 plot2 = ggplot(forecast2) +
   aes(x = ds, y = yhat, size = yhat) +
   geom_line(size = 1.25,colour = "#d8576b") +
-  labs(x = "No. of Days", y = "Number of Deaths Cases", subtitle = "Forecasting for next 5 Days") +
+  labs(x = "No. of Days", y = "Number of Deaths Cases", subtitle = "Forecasting for next 7 Days") +
   ggthemes::theme_gdocs()  +
   theme(legend.position = "none")
 
@@ -487,9 +485,9 @@ y = data8[,c("Confirmed")]
 
 df3 = data.frame(ds,y)
 
-model3 = prophet(df3,yearly.seasonality = T,daily.seasonality = T,weekly.seasonality = T)
+model3 = prophet(df3,yearly.seasonality = T ,daily.seasonality = T,weekly.seasonality = T)
 
-future3 <- make_future_dataframe(model3, periods = 5)
+future3 <- make_future_dataframe(model3, periods = 7)
 
 
 forecast3 <- predict(model3, future3)
@@ -497,7 +495,7 @@ forecast3 <- predict(model3, future3)
 plot3 = ggplot(forecast3) +
   aes(x = ds, y = yhat, size = yhat) +
   geom_line(size = 1.25, colour = "#d8576b") +
-  labs(x = "No. of Days", y = "Number of Confirmed Cases", subtitle = "Forecasting for next 5 Days") +
+  labs(x = "No. of Days", y = "Number of Confirmed Cases", subtitle = "Forecasting for next 7 Days") +
   ggthemes::theme_gdocs() +
   theme(legend.position = "none")
 
@@ -519,7 +517,7 @@ df4 = data.frame(ds,y)
 
 model4 = prophet(df4,yearly.seasonality = T,daily.seasonality = T,weekly.seasonality = T)
 
-future4 <- make_future_dataframe(model4, periods = 5)
+future4 <- make_future_dataframe(model4, periods = 7)
 
 
 forecast4 <- predict(model4, future4)
@@ -527,7 +525,7 @@ forecast4 <- predict(model4, future4)
 plot4 = ggplot(forecast4) +
   aes(x = ds, y = yhat, size = yhat) +
   geom_line(size = 1.25, colour = "#d8576b") +
-  labs(x = "No. of Days", y = "Number of Deaths Cases", subtitle = "Forecasting for next 5 Days") +
+  labs(x = "No. of Days", y = "Number of Deaths Cases", subtitle = "Forecasting for next 7 Days") +
   ggthemes::theme_gdocs()  +
   theme(legend.position = "none")
 
@@ -551,7 +549,7 @@ df5 = data.frame(ds,y)
 
 model5 = prophet(df5,yearly.seasonality = T,daily.seasonality = T,weekly.seasonality = T)
 
-future5 <- make_future_dataframe(model5, periods = 5)
+future5 <- make_future_dataframe(model5, periods = 7)
 
 
 forecast5 <- predict(model5, future5)
@@ -560,7 +558,7 @@ forecast5 <- predict(model5, future5)
 plot5 = ggplot(forecast5) +
   aes(x = ds, y = yhat, size = yhat) +
   geom_line(size = 1.25, colour = "#d8576b") +
-  labs(x = "No. of Days", y = "Number of Confirmed Cases", subtitle = "Forecasting for next 5 Days") +
+  labs(x = "No. of Days", y = "Number of Confirmed Cases", subtitle = "Forecasting for next 7 Days") +
   ggthemes::theme_gdocs() +
   theme(legend.position = "none")
 
@@ -582,7 +580,7 @@ df6 = data.frame(ds,y)
 
 model6 = prophet(df6,yearly.seasonality = T,daily.seasonality = T,weekly.seasonality = T)
 
-future6 <- make_future_dataframe(model6, periods = 6)
+future6 <- make_future_dataframe(model6, periods = 7)
 
 
 forecast6 <- predict(model6, future6)
@@ -590,7 +588,7 @@ forecast6 <- predict(model6, future6)
 plot6 = ggplot(forecast6) +
   aes(x = ds, y = yhat, size = yhat) +
   geom_line(size = 1.25, colour = "#d8576b") +
-  labs(x = "No. of Days", y = "Number of Death Cases", subtitle = "Forecasting for next 5 Days") +
+  labs(x = "No. of Days", y = "Number of Death Cases", subtitle = "Forecasting for next 7 Days") +
   ggthemes::theme_gdocs() +
   theme(legend.position = "none")
 
@@ -609,6 +607,7 @@ sidebar = dashboardSidebar(width = 170,
   sidebarMenu(
     menuItem("Global View", tabName = "worldstats", icon = icon("list-alt"),badgeLabel = "New",  badgeColor = "green"),
     menuItem("Top5 Countries View", tabName = "top5",icon = icon("table")),
+    menuItem("Increase/day", tabName = "Increaseperday", icon = icon("list-alt"),badgeLabel = "New", badgeColor = "green"),
     menuItem("Indian View", tabName = "indianstats", icon = icon("list-alt"),badgeLabel = "New", badgeColor = "green")
     )
     )
@@ -643,21 +642,38 @@ body = dashboardBody(tabItems(
 
 tabItem(tabName = "top5", 
         fluidRow(
-          box(title = "Top5 Countries Confirmed (Nos)", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5confirmedno")),
-          box(title = "Top5 Countries Deaths (Nos)", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5deathsno")),
-          box(title = "Top5 Countries Confirmed Incs (Nos)", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5confirmedno_delta")),
-          box(title = "Top5 Countries Deaths Incs (Nos)", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5deathsno_delta"))
+          box(title = "Confirmed (Nos)", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5confirmedno")),
+          box(title = "Deaths (Nos)", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5deathsno")),
+          box(title = "Recovered (Nos)", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5recoveredno")),
+          box(title = "Active (Nos)", background= "purple",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5activeno"))
         ),
         
         fluidRow(
-          box(title = "Top5 Countries Confirmed (%)", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5confirmedper")),       
-          box(title = "Top5 Countries Deaths (%)", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5deathsper")),
-          box(title = "Top5 Countries Deaths Incs (%)", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5confirmedper_delta")),
-          box(title = "Top5 Countries Deaths Incs (%)", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5deathsper_delta"))   
+          box(title = "Confirmed (%)", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5confirmedper")),       
+          box(title = "Deaths (%)", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5deathsper")),
+          box(title = "Recovered (%)", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5recoveredper")),
+          box(title = "Active(%)", background= "purple",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5activeper"))   
         ) 
         ),
 
+
 #-------------------------------------------------------Tab3 Starts----------------------------------------------------#
+
+tabItem(tab = "Increaseperday",
+        
+        fluidRow( box(title = "Confirmed/day (Nos)", background= "blue",solidHeader = T, width = 4, collapsible = T,style = "font-size: 150%;",tableOutput("top5confirmed_day_no")),
+                  box(title = "Deaths/day (Nos)", background= "red",solidHeader = T, width = 4, collapsible = T,style = "font-size: 150%;",tableOutput("top5deaths_day_no")),
+                  box(title = "Recovered/day (Nos)", background= "green",solidHeader = T, width = 4, collapsible = T,style = "font-size: 150%;",tableOutput("top5recovered_day_no"))
+          
+        ),
+
+       fluidRow( box(title = "Confirmed/day (%)", background= "blue",solidHeader = T, width = 4, collapsible = T,style = "font-size: 150%;",tableOutput("top5confirmed_day_per")),
+                 box(title = "Deaths/day (%)", background= "red",solidHeader = T, width = 4, collapsible = T,style = "font-size: 150%;",tableOutput("top5deaths_day_per")),
+                 box(title = "Recovered/day (%)", background= "green",solidHeader = T, width = 4, collapsible = T,style = "font-size: 150%;",tableOutput("top5recovered_day_per"))
+)
+),
+
+#-------------------------------------------------------Tab4 Starts----------------------------------------------------#
 
 tabItem(tabName = "indianstats", 
         fluidRow(
@@ -684,7 +700,7 @@ tabItem(tabName = "indianstats",
 )
 
 ui <- dashboardPage(skin = "purple",
-  dashboardHeader(title = span("Coronavirus Status Dashboard (Data Updated till 29th March 2020)",style = "font-family: Arial; font-weight: bold"),titleWidth = 1500),
+  dashboardHeader(title = span("Coronavirus Status Dashboard",style = "font-family: Arial; font-weight: bold"),titleWidth = 1500),
   sidebar,
   body
 )
@@ -709,14 +725,25 @@ shinyApp(ui = ui, server = function(input, output) {
   
   output$top5confirmedno = renderTable(data_merged_conf_no, digits = 0)
   output$top5deathsno = renderTable(data_merged_deaths_no,digits = 0)
-  output$top5confirmedno_delta = renderTable(data_merged_conf_delta_no,digits = 0)
-  output$top5deathsno_delta = renderTable(data_merged_deaths_delta_no,digits = 0)
+  output$top5recoveredno = renderTable(data_merged_recovered_no,digits = 0)
+  output$top5activeno = renderTable(data_merged_active_no,digits = 0)
   output$top5confirmedper = renderTable(data_merged_conf_pr)
   output$top5deathsper = renderTable(data_merged_death_pr)
-  output$top5confirmedper_delta = renderTable(data_merged_conf_inc_per)
-  output$top5deathsper_delta = renderTable(data_merged_deaths_inc_per)
+  output$top5recoveredper = renderTable(data_merged_recovered_inc_per)
+  output$top5activeper = renderTable(data_merged_active_pr)
   
-  #-------------------------- For 3rd tab ------------------------------#
+  
+  #------------------------------- For 3rd tab-----------------------------#
+  
+  output$top5confirmed_day_no = renderTable(data_merged_conf_delta_no, digits = 0)
+  output$top5deaths_day_no = renderTable(data_merged_deaths_delta_no,digits = 0)
+  output$top5recovered_day_no = renderTable(data_merged_recovered_delta_no,digits = 0)
+  output$top5confirmed_day_per = renderTable(data_merged_conf_inc_per)
+  output$top5deaths_day_per = renderTable(data_merged_deaths_inc_per)
+  output$top5recovered_day_per = renderTable(data_merged_recovered_inc_per)
+
+  
+  #-------------------------- For 4rd tab ------------------------------#
   
   output$indianconfirmed = renderText(Indian_Confirmed)
   output$indiandeaths = renderText(Indian_Deaths)
@@ -728,7 +755,6 @@ shinyApp(ui = ui, server = function(input, output) {
   output$indianmortality = renderText(Indian_Mortality)
   output$forecaseting_confirmed_india = renderPlot(plot3)
   output$forecaseting_deaths_india = renderPlot(plot4)
-  
   
   })
 

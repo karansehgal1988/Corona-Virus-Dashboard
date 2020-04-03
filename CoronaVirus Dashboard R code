@@ -45,7 +45,7 @@ data3$Active = data3$Confirmed - (data3$Recovered+data3$Deaths)
 
 data_merged = inner_join(data2,data3,by= "Country")
 
-# ------------ Repalcing NA with 0--------------------#
+# -------------------------------------------Repalcing NA with 0---------------------------------------------#
 
 data_merged$Confirmed.x[is.na(data_merged$Confirmed.x)] = 0
 data_merged$Deaths.x[is.na(data_merged$Deaths.x)] = 0
@@ -594,6 +594,69 @@ plot6 = ggplot(forecast6) +
 
 plot6 #US Deaths Case
 
+#---------------------------------------------------Geo spatial Analysis---------------------------------------#
+
+## geocoding function using OSM Nominatim API
+
+nominatim_osm <- function(address = NULL)
+{
+  if(suppressWarnings(is.null(address)))
+    return(data.frame())
+  tryCatch(
+    d <- jsonlite::fromJSON( 
+      gsub('\\@addr\\@', gsub('\\s+', '\\%20', address), 
+           'http://nominatim.openstreetmap.org/search/@addr@?format=json&addressdetails=0&limit=1')
+    ), error = function(c) return(data.frame())
+  )
+  if(length(d) == 0) return(data.frame())
+  return(data.frame(lon = as.numeric(d$lon), lat = as.numeric(d$lat)))
+}
+
+
+#dplyr will be used to stack lists together into a data.frame and to get the pipe operator '%>%'
+suppressPackageStartupMessages(library(dplyr))
+#input addresses
+
+addresses = data2[,"Country"]
+
+d <- suppressWarnings(lapply(addresses, function(address) {
+  #set the elapsed time counter to 0
+  t <- Sys.time()
+  #calling the nominatim OSM API
+  api_output <- nominatim_osm(address)
+  #get the elapsed time
+  t <- difftime(Sys.time(), t, 'secs')
+  #return data.frame with the input address, output of the nominatim_osm function and elapsed time
+  return(data.frame(address = address, api_output, elapsed_time = t))
+}) %>%
+  #stack the list output into data.frame
+  bind_rows() %>% data.frame())
+#output the data.frame content into console
+
+colnames(d)
+
+data10 = d 
+
+
+data10 = d[,c("address","lon","lat")]
+data10 = cbind(data10,data2$Confirmed)
+
+data10 = rename(data10,Country = address, Longitute = lon, Latitude = lat, Confirmed = 'data2$Confirmed')
+
+
+
+
+
+# load libraries
+library(ggplot2)
+library(sp)
+install.packages("rgdal",type = "source")
+install.packages("rgeos")
+
+
+
+
+
 
 # -------------------------------------------------- Shiny Dashboard -------------------------------------------#
 
@@ -694,12 +757,12 @@ tabItem(tabName = "indianstats",
           box(title = "Forecasting of Confirmed Cases", background= "orange",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("forecaseting_confirmed_india")),
           box(title = "Forecasting of Death Cases", background= "orange",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("forecaseting_deaths_india"))
         )
-        )  
+        ) 
 
 )
 )
 
-ui <- dashboardPage(skin = "purple",
+ui <- dashboardPage(skin = "blue",
   dashboardHeader(title = span("Coronavirus Status Dashboard",style = "font-family: Arial; font-weight: bold"),titleWidth = 1500),
   sidebar,
   body
@@ -759,4 +822,3 @@ shinyApp(ui = ui, server = function(input, output) {
   })
 
 #-------------------------------------------------- End of Shiny Dashboard -------------------------------------------#
-

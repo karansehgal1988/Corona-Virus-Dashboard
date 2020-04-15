@@ -1,11 +1,11 @@
-# -------------------------------------------------- Shiny Dashboard -------------------------------------------#
 options(scipen = 999)
 library(shiny)
 library(shinydashboard)
 library(lubridate)
 library(ggplot2)
 library(scales)
-library(prophet)
+library(forecast)
+library(tseries)
 library(dplyr)
 
 sidebar = dashboardSidebar(width = 170,

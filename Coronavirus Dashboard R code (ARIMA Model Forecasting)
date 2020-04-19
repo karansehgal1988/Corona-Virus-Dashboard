@@ -1,3 +1,4 @@
+# -------------------------------------------------- Shiny Dashboard -------------------------------------------#
 options(scipen = 999)
 library(shiny)
 library(shinydashboard)
@@ -8,12 +9,14 @@ library(forecast)
 library(tseries)
 library(dplyr)
 
-sidebar = dashboardSidebar(width = 170,
+sidebar = dashboardSidebar(width = 200,
                            sidebarMenu(
-                             menuItem("Global View", tabName = "worldstats", icon = icon("list-alt"),badgeLabel = "New",  badgeColor = "green"),
-                             menuItem("Top5 Countries View", tabName = "top5",icon = icon("table")),
-                             menuItem("Increase/day", tabName = "Increaseperday", icon = icon("list-alt"),badgeLabel = "New", badgeColor = "green"),
-                             menuItem("Indian View", tabName = "indianstats", icon = icon("list-alt"),badgeLabel = "New", badgeColor = "green")
+                             menuItem("Global View", tabName = "worldstats", icon = icon("dashboard"),badgeLabel = "Old",  badgeColor = "green"),
+                             menuItem("Top5 View", tabName = "top5",icon = icon("table"),badgeLabel = "Old",  badgeColor = "green"),
+                             menuItem("Top5 Incs/day View", tabName = "Increaseperday", icon = icon("list-alt"),badgeLabel = "Old", badgeColor = "green"),
+                             menuItem("Indian View", tabName = "indianstats", icon = icon("dashboard"),badgeLabel = "Old", badgeColor = "green"),
+                             menuItem("USA View", tabName = "usastats", icon = icon("dashboard"),badgeLabel = "New", badgeColor = "red"),
+                             menuItem("Forecasts", tabName = "forecasts", icon = icon("dashboard"),badgeLabel = "New", badgeColor = "red")
                            )
 )
 
@@ -66,15 +69,15 @@ body = dashboardBody(tabItems(
   
   tabItem(tab = "Increaseperday",
           
-          fluidRow( box(title = "Confirmed/day (Nos)", background= "blue",solidHeader = T, width = 4, collapsible = T,style = "font-size: 150%;",tableOutput("top5confirmed_day_no")),
-                    box(title = "Deaths/day (Nos)", background= "red",solidHeader = T, width = 4, collapsible = T,style = "font-size: 150%;",tableOutput("top5deaths_day_no")),
-                    box(title = "Recovered/day (Nos)", background= "green",solidHeader = T, width = 4, collapsible = T,style = "font-size: 150%;",tableOutput("top5recovered_day_no"))
+          fluidRow( box(title = "Confirmed/day (Nos)", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5confirmed_day_no")),
+                    box(title = "Deaths/day (Nos)", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5deaths_day_no")),
+                    box(title = "Recovered/day (Nos)", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5recovered_day_no"))
                     
           ),
           
-          fluidRow( box(title = "Confirmed/day (%)", background= "blue",solidHeader = T, width = 4, collapsible = T,style = "font-size: 150%;",tableOutput("top5confirmed_day_per")),
-                    box(title = "Deaths/day (%)", background= "red",solidHeader = T, width = 4, collapsible = T,style = "font-size: 150%;",tableOutput("top5deaths_day_per")),
-                    box(title = "Recovered/day (%)", background= "green",solidHeader = T, width = 4, collapsible = T,style = "font-size: 150%;",tableOutput("top5recovered_day_per"))
+          fluidRow( box(title = "Confirmed/day (%)", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5confirmed_day_per")),
+                    box(title = "Deaths/day (%)", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5deaths_day_per")),
+                    box(title = "Recovered/day (%)", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5recovered_day_per"))
           )
   ),
   
@@ -106,7 +109,7 @@ body = dashboardBody(tabItems(
 
 
 ui <- dashboardPage(skin = "blue",
-                    dashboardHeader(title = span("Coronavirus Status Dashboard",style = "font-family: Arial; font-weight: bold"),titleWidth = 2000),
+                    dashboardHeader(title = span("Coronavirus Status Dashboard",style = "font-family: Arial; font-weight: bold"),titleWidth = 1800),
                     sidebar,
                     body
 )
@@ -114,25 +117,25 @@ ui <- dashboardPage(skin = "blue",
 # Preview the UI in the console
 server = function(input, output) {
   
+  library(lubridate)
+  library(ggplot2)
+  library(scales)
+  library(forecast)
+  library(tseries)
+  library(dplyr)
   
   #---------------------------------------------------------Calculations--------------------------------------------------------------#
+  
   
   url = "https://raw.githubusercontent.com/datasets/covid-19/master/data/countries-aggregated.csv"
   
   data  = read.csv(url)
   
+  data$Date = as_date(data$Date)
+
+  data = arrange(data,desc(Date))
   
-  
-  data$Date = lubridate::as_date(data$Date)
-  
-  
-  data = dplyr::arrange(data,desc(Date))
-  
-  
-  data1 = data%>%group_by(Date,Country)%>%summarise(confirmed = sum(Confirmed),deaths=sum(Deaths),recovered = sum(Recovered))
-  
-  
-  data1 = dplyr::arrange(data,desc(Date))
+  data = data%>%group_by(Date,Country)%>%summarise(confirmed = sum(Confirmed),deaths=sum(Deaths),recovered = sum(Recovered))%>%arrange(desc(Date))%>%data.frame()
   
   date1 = Sys.Date() -  data[1,"Date"]
   
@@ -150,122 +153,96 @@ server = function(input, output) {
     Sys.Date()-3
   }
   
-  data2 = data.frame(filter(data1,Date==date2))
+  data2 = data.frame(filter(data,Date==date2))
   
-  data3 = data.frame(filter(data1,Date==date3))
+  data3 = data.frame(filter(data,Date==date3))
   
-  data2$Active = data2$Confirmed - (data2$Recovered+data2$Deaths)
-  data3$Active = data3$Confirmed - (data3$Recovered+data3$Deaths)
+  data2$active = data2$confirmed - (data2$recovered+data2$deaths)
+  data3$active = data3$confirmed - (data3$recovered+data3$deaths)
   
   data_merged = inner_join(data2,data3,by= "Country")
   
   # -------------------------------------------Repalcing NA with 0---------------------------------------------#
   
-  data_merged$Confirmed.x[is.na(data_merged$Confirmed.x)] = 0
-  data_merged$Deaths.x[is.na(data_merged$Deaths.x)] = 0
-  data_merged$Recovered.x[is.na(data_merged$Recovered.x)] = 0
-  data_merged$Confirmed.y[is.na(data_merged$Confirmed.y)] = 0
-  data_merged$Deaths.y[is.na(data_merged$Deaths.y)] = 0
-  data_merged$Recovered.y[is.na(data_merged$Recovered.y)] = 0
+  data_merged$confirmed.x[is.na(data_merged$confirmed.x)] = 0
+  data_merged$deaths.x[is.na(data_merged$deaths.x)] = 0
+  data_merged$recovered.x[is.na(data_merged$recovered.x)] = 0
+  data_merged$confirmed.y[is.na(data_merged$confirmed.y)] = 0
+  data_merged$deaths.y[is.na(data_merged$deaths.y)] = 0
+  data_merged$recovered.y[is.na(data_merged$recovered.y)] = 0
   
   data_merged$Date.y = NULL
   
+  
   #------------------ Difference from current date to Previous date ----------#
   
-  data_merged$Confirmed_delta = data_merged$Confirmed.x - data_merged$Confirmed.y
+  data_merged$confirmed_delta = data_merged$confirmed.x - data_merged$confirmed.y
   
+  data_merged$deaths_delta =   data_merged$deaths.x - data_merged$deaths.y
   
-  data_merged$Deaths_delta =   data_merged$Deaths.x - data_merged$Deaths.y
+  data_merged$recovered_delta =   data_merged$recovered.x - data_merged$recovered.y
   
-  
-  data_merged$Recovered_delta =   data_merged$Recovered.x - data_merged$Recovered.y
-  
-  data_merged$Active_delta =   data_merged$Active.x - data_merged$Active.y
+  data_merged$active_delta =   data_merged$active.x - data_merged$active.y
   
   # ------------ Repalcing NA with 0 for active --------------------#
   
-  data_merged$Active.x[is.na(data_merged$Active.x)] = 0
-  data_merged$Active.y[is.na(data_merged$Active.y)] = 0
+  data_merged$active.x[is.na(data_merged$active.x)] = 0
+  data_merged$active.y[is.na(data_merged$active.y)] = 0
   #-------------------- Renaming of the Variables------------------#
   
-  
-  data_merged = rename(data_merged, Confirmed = Confirmed.x, Deaths = Deaths.x,Recovered = Recovered.x, Active = Active.x,
-                       Confirmed_Incs = Confirmed_delta, Deaths_Incs = Deaths_delta,
-                       Recovered_Incs = Recovered_delta, Active_Incs = Active_delta)
-  
-  
-  
+  data_merged = rename(data_merged, Confirmed = confirmed.x, Deaths = deaths.x,Recovered = recovered.x, Active = active.x,
+                       Confirmed_Incs = confirmed_delta, Deaths_Incs = deaths_delta,
+                       Recovered_Incs = recovered_delta, Active_Incs = active_delta)
+
   #-----------------------------------------------------Confirmed Cases Starts---------------------------------#
   
   
   #------------ Total Confimed Cases-----------#
   
   
-  total_confirmed = sum(data_merged$Confirmed)
-  
-  total_confirmed = comma(total_confirmed)
+  total_confirmed = data_merged$Confirmed%>%sum()%>%comma()
   
   total_confirmed 
+   
   
   #------------ Top 5 Countries Confirmed Cases No.------------#
   
-  data_merged3 = data_merged
-  
-  data_merged3 = arrange(data_merged3, desc(Confirmed))
-  
-  
-  data_merged_conf_no = data_merged3[1:5,c("Country","Confirmed")]
-  
+  data_merged_conf_no = data_merged%>%arrange(desc(Confirmed))%>%select(Country,Confirmed)%>%head(5)
   data_merged_conf_no$Confirmed = comma(data_merged_conf_no$Confirmed)
+  data_merged_conf_no  
   
-  data_merged_conf_no
   
   #------------ Top 5 Countries Confirmed Cases percentage.------------#
+
+  data_merged_conf_pr = data_merged%>%select(Country,Confirmed)%>%mutate(Percentage = Confirmed/sum(Confirmed)*100)%>%arrange(desc(Percentage))%>%select(-c(Confirmed))%>%head(5)
   
+  data_merged_conf_pr$Percentage = round(data_merged_conf_pr$Percentage,digits = 2)
   
-  data_merged3$Confirmed_Perct = (round(data_merged3$Confirmed/sum(data_merged3$Confirmed),digits = 4))*100
-  
-  
-  data_merged_conf_pr = data_merged3[1:5,c("Country","Confirmed_Perct")]
-  
-  
-  
-  data_merged_conf_pr$Confirmed_Perct = sprintf("%3g%%", data_merged_conf_pr$Confirmed_Perct)
+  data_merged_conf_pr$Percentage = sprintf("%3g%%", data_merged_conf_pr$Percentage)
   
   data_merged_conf_pr
   
   
   #------------------- Total Confirmed delta no.----------------#
   
-  data_merged_conf_delta_total = sum(data_merged3$Confirmed_Incs)
-  
-  data_merged_conf_delta_total = comma(data_merged_conf_delta_total)
+  data_merged_conf_delta_total = data_merged$Confirmed_Incs%>%sum()%>%comma()
   
   data_merged_conf_delta_total
   
   #------------------- Top 5 countries Confirmed delta no.----------------#
   
-  
-  data_merged3 = arrange(data_merged3, desc(Confirmed_Incs))
-  
-  
-  data_merged_conf_delta_no = data_merged3[1:5,c("Country","Confirmed_Incs")]
-  
-  
+  data_merged_conf_delta_no = data_merged%>%arrange(desc(Confirmed_Incs))%>%select(Country,Confirmed_Incs)%>%head(5)
   data_merged_conf_delta_no$Confirmed_Incs = comma(data_merged_conf_delta_no$Confirmed_Incs)
-  
-  data_merged_conf_delta_no
+  data_merged_conf_delta_no 
+
   
   #------------------- Top 5 countries Confirmed delta percentage.----------------#
   
-  data_merged3$Confirmed_Incs_Perct = round(data_merged3$Confirmed_Incs/(sum(data_merged3$Confirmed_Incs))*100,digits = 2)
+  data_merged_conf_inc_per= data_merged%>%select(Country,Confirmed_Incs)%>%mutate(Percentage = Confirmed_Incs/sum(Confirmed_Incs)*100)%>%arrange(desc(Percentage))%>%select(-c(Confirmed_Incs))%>%head(5)
   
+  data_merged_conf_inc_per$Percentage = round(data_merged_conf_inc_per$Percentage,digits = 2)
   
-  data_merged_conf_inc_per = data_merged3[1:5,c("Country","Confirmed_Incs_Perct")]
-  
-  colnames(data_merged_conf_inc_per)
-  
-  data_merged_conf_inc_per$Confirmed_Incs_Perct   = sprintf("%3g%%", data_merged_conf_inc_per$Confirmed_Incs_Perct)
+  data_merged_conf_inc_per$Percentage = sprintf("%3g%%", data_merged_conf_inc_per$Percentage)
   
   data_merged_conf_inc_per
   
@@ -276,70 +253,49 @@ server = function(input, output) {
   #------------------------------------------------- Deaths Cases Starts----------------------------------------#
   
   
-  
   #--------- Total Deaths Cases---------------#
   
-  total_death = sum(data_merged$Deaths)
-  
-  total_death = comma(total_death)
-  
+  total_death = data_merged$Deaths%>%sum()%>%comma()
+
   total_death
   
   #------------ Top 5 Countries Deaths Cases No.------------#
   
-  data_merged2 = data_merged
-  
-  data_merged2 = arrange(data_merged2, desc(Deaths))
-  
-  
-  data_merged_deaths_no = data_merged2[1:5,c("Country","Deaths")]
-  
+  data_merged_deaths_no = data_merged%>%arrange(desc(Deaths))%>%select(Country,Deaths)%>%head(5)
   data_merged_deaths_no$Deaths = comma(data_merged_deaths_no$Deaths)
-  
-  data_merged_deaths_no
+  data_merged_deaths_no  
   
   #------------ Top 5 Countries Deaths Cases Percentage.------------#
   
+  data_merged_death_pr = data_merged%>%select(Country,Deaths)%>%mutate(Percentage = Deaths/sum(Deaths)*100)%>%arrange(desc(Percentage))%>%select(-c(Deaths))%>%head(5)
   
-  data_merged2$Death_Perct= (round(data_merged2$Deaths/sum(data_merged2$Deaths),digits = 4))*100
+  data_merged_death_pr$Percentage = round(data_merged_death_pr$Percentage,digits = 2)
   
-  data_merged_death_pr = data_merged2[1:5,c("Country","Death_Perct")]
-  
-  data_merged_death_pr$Death_Perct = sprintf("%3g%%", data_merged_death_pr$Death_Perct)
+  data_merged_death_pr$Percentage = sprintf("%3g%%", data_merged_death_pr$Percentage)
   
   data_merged_death_pr
   
   
   #------------------- Total deaths delta----------------#
   
-  data_merged_deaths_delta_total = sum(data_merged2$Deaths_Incs)
-  
-  data_merged_deaths_delta_total = comma(data_merged_deaths_delta_total)
+  data_merged_deaths_delta_total = data_merged$Deaths_Incs%>%sum()%>%comma()
   
   data_merged_deaths_delta_total
   
+
   #------------------- Top 5 countries deaths delta no.----------------#
   
-  
-  data_merged2 = arrange(data_merged2, desc(Deaths_Incs))
-  
-  
-  data_merged_deaths_delta_no = data_merged2[1:5,c("Country","Deaths_Incs")]
-  
-  
+  data_merged_deaths_delta_no = data_merged%>%arrange(desc(Deaths_Incs))%>%select(Country,Deaths_Incs)%>%head(5)
   data_merged_deaths_delta_no$Deaths_Incs = comma(data_merged_deaths_delta_no$Deaths_Incs)
-  
-  data_merged_deaths_delta_no
+  data_merged_deaths_delta_no 
   
   #------------------- Top 5 countries deaths delta percentage.----------------#
   
-  data_merged2$Deaths_Incs_Perct = round(data_merged2$Deaths_Incs/(sum(data_merged$Deaths_Incs))*100,digits = 2)
+  data_merged_deaths_inc_per= data_merged%>%select(Country,Deaths_Incs)%>%mutate(Percentage = Deaths_Incs/sum(Deaths_Incs)*100)%>%arrange(desc(Percentage))%>%select(-c(Deaths_Incs))%>%head(5)
   
+  data_merged_deaths_inc_per$Percentage = round(data_merged_deaths_inc_per$Percentage,digits = 2)
   
-  data_merged_deaths_inc_per = data_merged2[1:5,c("Country","Deaths_Incs_Perct")]
-  
-  
-  data_merged_deaths_inc_per$Deaths_Incs_Perct   = sprintf("%3g%%",data_merged_deaths_inc_per$Deaths_Incs_Perct)
+  data_merged_deaths_inc_per$Percentage = sprintf("%3g%%", data_merged_deaths_inc_per$Percentage)
   
   data_merged_deaths_inc_per
   
@@ -350,109 +306,74 @@ server = function(input, output) {
   
   #--------- Total Recovered Cases---------------#
   
-  total_recovered = sum(data_merged$Recovered)
-  
-  total_recovered = comma(total_recovered)
+  total_recovered = data_merged$Recovered%>%sum()%>%comma()
   
   total_recovered
   
   #------------ Top 5 Countries Recovered Cases No.------------#
   
-  data_merged5 = data_merged
-  
-  data_merged5 = arrange(data_merged5, desc(Recovered))
-  
-  
-  data_merged_recovered_no = data_merged5[1:5,c("Country","Recovered")]
-  
+  data_merged_recovered_no = data_merged%>%arrange(desc(Recovered))%>%select(Country,Recovered)%>%head(5)
   data_merged_recovered_no$Recovered = comma(data_merged_recovered_no$Recovered)
-  
   data_merged_recovered_no
   
-  #------------ Top 5 Countries Recovered Cases Percentage.------------#
+  #------------ Top 5 Countries Recovered Cases Percentage ------------#
   
+  data_merged_recovered_pr = data_merged%>%select(Country,Recovered)%>%mutate(Percentage = Recovered/sum(Recovered)*100)%>%arrange(desc(Percentage))%>%select(-c(Recovered))%>%head(5)
   
+  data_merged_recovered_pr$Percentage = round(data_merged_recovered_pr$Percentage,digits = 2)
   
-  data_merged5$Recovered_Perct= (round(data_merged5$Recovered/sum(data_merged5$Recovered),digits = 4))*100
-  
-  data_merged_recovered_pr = data_merged5[1:5,c("Country","Recovered_Perct")]
-  
-  data_merged_recovered_pr$Recovered_Perct = sprintf("%3g%%", data_merged_recovered_pr$Recovered_Perct)
+  data_merged_recovered_pr$Percentage = sprintf("%3g%%", data_merged_recovered_pr$Percentage)
   
   data_merged_recovered_pr
   
-  
   #------------------- Total Recovered delta----------------#
   
-  data_merged_recovered_delta_total = sum(data_merged5$Recovered_Incs)
-  
-  data_merged_recovered_delta_total = comma(data_merged_recovered_delta_total)
+  data_merged_recovered_delta_total = sum(data_merged$Recovered_Incs)%>%comma()
   
   data_merged_recovered_delta_total
   
   #------------------- Top 5 countries Recovered delta no.----------------#
   
-  
-  data_merged5 = arrange(data_merged5, desc(Recovered_Incs))
-  
-  
-  data_merged_recovered_delta_no = data_merged5[1:5,c("Country","Recovered_Incs")]
-  
-  
+  data_merged_recovered_delta_no = data_merged%>%arrange(desc(Recovered_Incs))%>%select(Country,Recovered_Incs)%>%head(5)
   data_merged_recovered_delta_no$Recovered_Incs = comma(data_merged_recovered_delta_no$Recovered_Incs)
-  
   data_merged_recovered_delta_no
-  
   
   #------------------- Top 5 countries Recovered delta percentage.----------------#
   
-  data_merged5$Recovered_Incs_Perct = round(data_merged5$Recovered_Incs/(sum(data_merged$Recovered_Incs))*100,digits = 2)
+  data_merged_recovered_inc_per= data_merged%>%select(Country,Recovered_Incs)%>%mutate(Percentage = Recovered_Incs/sum(Recovered_Incs)*100)%>%arrange(desc(Percentage))%>%select(-c(Recovered_Incs))%>%head(5)
   
+  data_merged_recovered_inc_per$Percentage = round(data_merged_recovered_inc_per$Percentage,digits = 2)
   
-  data_merged_recovered_inc_per = data_merged5[1:5,c("Country","Recovered_Incs_Perct")]
-  
-  
-  data_merged_recovered_inc_per$Recovered_Incs_Perct   = sprintf("%3g%%",data_merged_recovered_inc_per$Recovered_Incs_Perct)
+  data_merged_recovered_inc_per$Percentage = sprintf("%3g%%", data_merged_recovered_inc_per$Percentage)
   
   data_merged_recovered_inc_per
   
-  
   #--------------------------------------- Recovered Cases Ends--------------------------#
+  
   
   #--------------------------------------- Active Cases Cases Ends--------------------------------#
   
-  total_active = sum(data_merged$Active)
-  
-  total_active = comma(total_active)
+  total_active = data_merged$Active%>%sum()%>%comma()
   
   total_active
-  
-  
+
   #------------ Top 5 Countries Active Cases No.------------#
-  
-  data_merged6 = data_merged
-  
-  data_merged6 = arrange(data_merged6, desc(Active))
-  
-  
-  data_merged_active_no = data_merged6[1:5,c("Country","Active")]
-  
+
+  data_merged_active_no = data_merged%>%arrange(desc(Active))%>%select(Country,Active)%>%head(5)
   data_merged_active_no$Active = comma(data_merged_active_no$Active)
-  
   data_merged_active_no
   
-  #------------ Top 5 Countries Recovered Cases Percentage.------------#
+  #------------ Top 5 Countries Active Cases Percentage.------------#
   
   
-  data_merged6$Active_Perct= (round(data_merged6$Active/sum(data_merged6$Active),digits = 4))*100
   
-  data_merged_active_pr = data_merged6[1:5,c("Country","Active_Perct")]
+  data_merged_active_pr = data_merged%>%select(Country,Active)%>%mutate(Percentage = Active/sum(Active)*100)%>%arrange(desc(Percentage))%>%select(-c(Active))%>%head(5)
   
-  data_merged_active_pr$Active_Perct = sprintf("%3g%%", data_merged_active_pr$Active_Perct)
+  data_merged_active_pr$Percentage = round(data_merged_active_pr$Percentage,digits = 2)
+  
+  data_merged_active_pr$Percentage = sprintf("%3g%%", data_merged_active_pr$Percentage)
   
   data_merged_active_pr
-  
-  
   #-------------------------------------Mortality %-----------------------------#
   
   #Overall %
@@ -463,26 +384,6 @@ server = function(input, output) {
   
   Mortality_Overall 
   
-  
-  # Country Specific
-  
-  
-  data_merged4 = data_merged 
-  
-  data_merged4$Mortality_Perct = round(data_merged4$Deaths/(data_merged4$Confirmed)*100,digits=2)
-  
-  
-  data_merged4= arrange(data_merged4, desc(data_merged4$Mortality_Perct))
-  
-  Mortality_countrywise = data_merged4[,c("Country","Mortality_Perct")]                
-  
-  Mortality_countrywise = filter(Mortality_countrywise, Country =="India"|Country == "China"| Country =="USA" |Country=="Spain"|
-                                   Country=="France"|Country =="Iran"|Country=="United Kingdom"|Country=="Italy")
-  
-  Mortality_countrywise$Mortality_Perct = sprintf("%3g%%", Mortality_countrywise$Mortality_Perct)
-  Mortality_countrywise
-  
-  
   #----------------------------------------- India Analytics-----------------------------#
   
   
@@ -491,40 +392,33 @@ server = function(input, output) {
   data5 = filter(data3, Country=="India")
   
   
-  Indian_Confirmed = data4[,"Confirmed"]
+  #---------------------- Confirmed Cases--------------------------------#
   
-  Indian_Confirmed = comma(Indian_Confirmed)
+  Indian_Confirmed = data4$confirmed%>%sum()%>%comma()
   
+  #---------------------- Deaths Cases--------------------------------#
   
-  Indian_Deaths = data4[,"Deaths"]
+  Indian_Deaths = data4$deaths%>%sum()%>%comma()
   
-  Indian_Deaths = comma(Indian_Deaths)
+  #----------------------- Recovered Cases-------------------------#
   
+  Indian_Recovered = data4$recovered%>%sum()%>%comma()
   
-  Indian_Recovered = data4[,"Recovered"]
+  #----------------------- Active Cases----------------------------#
   
-  Indian_Recovered = comma(Indian_Recovered)
+  Indian_Active = data4$active%>%sum()%>%comma()
   
-  Indian_Active = data4$Confirmed - (data4$Recovered+data4$Deaths)
+  Indian_Confirmed_Increase = (data4$confirmed - data5$confirmed)%>%comma()
   
-  Indian_Active = comma(Indian_Active)
+  Indian_Deaths_Increase = (data4$deaths - data5$deaths)%>%comma()
   
-  Indian_Confirmed_Increase = data4$Confirmed - data5$Confirmed
-  
-  Indian_Confirmed_Increase = comma(Indian_Confirmed_Increase)
-  
-  Indian_Deaths_Increase = data4$Deaths - data5$Deaths
-  
-  Indian_Deaths_Increase = comma(Indian_Deaths_Increase)
-  
-  Indian_Recovered_Increase = data4$Recovered - data5$Recovered
-  
-  Indian_Recovered_Increase = comma(Indian_Recovered_Increase)
+  Indian_Recovered_Increase = (data4$recovered - data5$recovered)%>%comma()
   
   
-  Indian_Mortality = round((data4$Deaths/data4$Confirmed)*100,digits = 2)
+  #------------------------------- Mortality % ------------------------#
+  data4 
+  Indian_Mortality = round((data4$deaths/data4$confirmed)*100,digits = 2)
   Indian_Mortality = sprintf("%3g%%", Indian_Mortality)
-  
   
   #--------------------------------------------- Forecasting ----------------------------------#
   
@@ -532,83 +426,65 @@ server = function(input, output) {
   
   # World Confirmed Case
   
+  ds_dates = if (date1 == 1) {
+    data.frame(date = c(Sys.Date(),Sys.Date()+1,Sys.Date()+2,Sys.Date()+3,Sys.Date()+4,Sys.Date()+5,
+                        Sys.Date()+6,Sys.Date()+7,Sys.Date()+8,Sys.Date()+9,Sys.Date()+10,Sys.Date()+11,Sys.Date()+12,Sys.Date()+13,Sys.Date()+14))
+  } else {
+    data.frame(date = c(Sys.Date()-1,Sys.Date(),Sys.Date()+1,Sys.Date()+2,Sys.Date()+3,Sys.Date()+4,Sys.Date()+5,
+                        Sys.Date()+6,Sys.Date()+7,Sys.Date()+8,Sys.Date()+9,Sys.Date()+10,Sys.Date()+11,Sys.Date()+12,Sys.Date()+13))
+    
+  }
   
-  ds_dates = data.frame(date = c(Sys.Date()-1,Sys.Date(),Sys.Date()+1,Sys.Date()+2,Sys.Date()+3,Sys.Date()+4,Sys.Date()+5,
-                                 Sys.Date()+6,Sys.Date()+7,Sys.Date()+8,Sys.Date()+9,Sys.Date()+10,Sys.Date()+11,Sys.Date()+12,Sys.Date()+13))
   
+  df1 = data%>%group_by(Date)%>%summarise(confirmed = sum(confirmed),deaths=sum(deaths),recovered = sum(recovered))%>%arrange(Date)%>%select(Date,confirmed)
   
-  data6 = data1%>%group_by(Date)%>%summarise(confirmed = sum(Confirmed),deaths=sum(Deaths),recovered = sum(Recovered))
-  
-  data6 = arrange(data6,Date)
-  
-  ds = data6[,c("Date")] 
-  y = data6[,c("confirmed")] 
-  
-  df1 = data.frame(ds,y)
-  
-  df1 = rename(df1, ds = Date, y = confirmed)
-  
-  data_ts1 = ts(df1$y, start=c(2020, 1), end=c(2020,nrow(df1)), frequency= nrow(df1)) 
+  data_ts1 = ts(df1$confirmed, start=c(2020, 1), end=c(2020,nrow(df1)), frequency= nrow(df1)) 
   
   model1 = auto.arima(data_ts1,trace = T) 
   
-  future1 = forecast(model1, h = 15)
+  future1 = forecast(model1, h = 15,level = 99)%>%data.frame()
   
-  future1 = data.frame(future1)
-  colnames(future1)
+  forecastshow1 = future1 ###############################
   
-  future1[,c("Lo.80","Hi.80","Lo.95","Hi.95")] = list(NULL)
+  future1[,c("Lo.99","Hi.99")] = list(NULL)
   
   forecast1 = cbind(ds_dates,future1)
   
-  forecast1 = rename(forecast1,ds = date, y = Point.Forecast )
+  forecast1 = rename(forecast1, Date = date, confirmed = Point.Forecast )
   
-  fulldata1 = rbind(df1,forecast1)
-  
-  plot(fulldata1)
-  
-  plot1 =   ggplot(fulldata1) +
-    aes(x = ds, y = y) +
+  fulldata1 = rbind(df1,forecast1)%>%data.frame()
+
+
+plot1 = ggplot(fulldata1) +
+    aes(x = Date, y = confirmed) +
     geom_line(size=1.25,colour = "#d8576b") +
-    labs(x = "No. of Days", y = "Number of Confirmed Cases", subtitle = "Forecasting for next 15 Days") +
+    labs(x = "No. of Days", y = "Number of Confirmed Cases", subtitle = "Forecasting for next 15 Days")+
     ggthemes::theme_gdocs() +
     theme(legend.position = "none")
   plot1 # World Confirmed Case
   
-  
   # World Deaths Case
   
-  data7 = data1%>%group_by(Date)%>%summarise(confirmed = sum(Confirmed),deaths=sum(Deaths),recovered = sum(Recovered))
+  df2 = data%>%group_by(Date)%>%summarise(confirmed = sum(confirmed),deaths=sum(deaths),recovered = sum(recovered))%>%arrange(Date)%>%select(Date,deaths)
   
-  data7 = arrange(data7,Date)
-  
-  ds = data7[,c("Date")] 
-  y = data7[,c("deaths")] 
-  
-  
-  df2 = data.frame(ds,y)
-  
-  df2 = rename(df2, ds = Date, y = deaths)
-  
-  
-  data_ts2 = ts(df2$y, start=c(2020, 1), end=c(2020,nrow(df2)), frequency= nrow(df2)) 
+  data_ts2 = ts(df2$deaths, start=c(2020, 1), end=c(2020,nrow(df2)), frequency= nrow(df2)) 
   
   model2 = auto.arima(data_ts2,trace = T) 
   
-  future2 = forecast(model2, h = 15)
+  future2 = forecast(model2, h = 15,level=99)%>%data.frame()
   
-  future2 = data.frame(future2)
+  forecastshow2 = future2 ################################
   
-  future2[,c("Lo.80","Hi.80","Lo.95","Hi.95")] = list(NULL)
+  future2[,c("Lo.99","Hi.99")] = list(NULL)
   
   forecast2 = cbind(ds_dates,future2)
   
-  forecast2 = rename(forecast2,ds = date, y = Point.Forecast )
+  forecast2 = rename(forecast2,Date = date, deaths = Point.Forecast )
   
-  fulldata2 = rbind(df2,forecast2)
+  fulldata2 = rbind(df2,forecast2)%>%data.frame()
   
   plot2 =   ggplot(fulldata2) +
-    aes(x = ds, y = y) +
+    aes(x = Date, y = deaths) +
     geom_line(size=1.25,colour = "#d8576b") +
     labs(x = "No. of Days", y = "Number of Death Cases", subtitle = "Forecasting for next 15 Days") +
     ggthemes::theme_gdocs() +
@@ -619,33 +495,26 @@ server = function(input, output) {
   
   #Indian Confirmed Case
   
-  data8 = filter(data1, Country=="India")
+  df3 = filter(data, Country=="India")%>%select(Date,confirmed)%>%arrange(Date)
   
-  data8 = arrange(data8,Date)
-  
-  ds = data8[,c("Date")] 
-  y = data8[,c("Confirmed")] 
-  
-  df3 = data.frame(ds,y)
-  
-  data_ts3 = ts(df3$y, start=c(2020, 1), end=c(2020,nrow(df3)), frequency= nrow(df3)) 
+  data_ts3 = ts(df3$confirmed, start=c(2020, 1), end=c(2020,nrow(df3)), frequency= nrow(df3)) 
   
   model3 = auto.arima(data_ts3,trace = T) 
   
-  future3 = forecast(model3, h = 15)
+  future3 = forecast(model3, h = 15,level = 99)%>%data.frame()
   
-  future3 = data.frame(future3)
+  forecastshow3 = future3 ###################################
   
-  future3[,c("Lo.80","Hi.80","Lo.95","Hi.95")] = list(NULL)
+  future3[,c("Lo.99","Hi.99")] = list(NULL)
   
   forecast3 = cbind(ds_dates,future3)
   
-  forecast3 = rename(forecast3,ds = date, y = Point.Forecast )
+  forecast3 = rename(forecast3,Date = date, confirmed = Point.Forecast )
   
   fulldata3 = rbind(df3,forecast3)
   
   plot3 =   ggplot(fulldata3) +
-    aes(x = ds, y = y) +
+    aes(x = Date, y = confirmed) +
     geom_line(size=1.25,colour = "#d8576b") +
     labs(x = "No. of Days", y = "Number of Confirmed Cases", subtitle = "Forecasting for next 15 Days") +
     ggthemes::theme_gdocs() +
@@ -656,37 +525,28 @@ server = function(input, output) {
   
   #Indian Deaths Case
   
-  data9 = filter(data1, Country=="India")
+  df4 = filter(data, Country=="India")%>%select(Date,deaths)%>%arrange(Date)
   
-  data9 = arrange(data9,Date)
-  
-  ds = data9[,c("Date")] 
-  y = data9[,c("Deaths")] 
-  
-  df4 = data.frame(ds,y)
-  
-  
-  data_ts4 = ts(df4$y, start=c(2020, 1), end=c(2020,nrow(df4)), frequency= nrow(df4)) 
-  
+  data_ts4 = ts(df4$deaths, start=c(2020, 1), end=c(2020,nrow(df4)), frequency= nrow(df4)) 
   
   model4 = auto.arima(data_ts4,trace = T) 
   
-  future4 = forecast(model4, h = 15)
+  future4 = forecast(model4, h = 15,level = 99)%>%data.frame()
   
-  future4 = data.frame(future4)
+  forecastshow4 = future4
   
-  future4[,c("Lo.80","Hi.80","Lo.95","Hi.95")] = list(NULL)
+  future4[,c("Lo.99","Hi.99")] = list(NULL)
   
   forecast4 = cbind(ds_dates,future4)
   
-  forecast4 = rename(forecast4,ds = date, y = Point.Forecast )
+  forecast4 = rename(forecast4,Date = date, deaths = Point.Forecast )
   
   fulldata4 = rbind(df4,forecast4)
   
   plot4 =   ggplot(fulldata4) +
-    aes(x = ds, y = y) +
+    aes(x = Date, y = deaths) +
     geom_line(size=1.25,colour = "#d8576b") +
-    labs(x = "No. of Days", y = "Number of Confirmed Cases", subtitle = "Forecasting for next 15 Days") +
+    labs(x = "No. of Days", y = "Number of Death Cases", subtitle = "Forecasting for next 15 Days") +
     ggthemes::theme_gdocs() +
     theme(legend.position = "none")
   
@@ -746,7 +606,6 @@ server = function(input, output) {
   output$forecaseting_deaths_india = renderPlot(plot4)
   
 }
-
 
 #-------------------------------------------------- End of Shiny Dashboard -------------------------------------------#
 shinyApp(ui = ui, server = server)

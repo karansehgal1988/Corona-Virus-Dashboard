@@ -102,7 +102,52 @@ body = dashboardBody(tabItems(
             box(title = "Forecasting of Confirmed Cases", background= "orange",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("forecaseting_confirmed_india")),
             box(title = "Forecasting of Death Cases", background= "orange",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("forecaseting_deaths_india"))
           )
+  ),
+  
+  
+  #-------------------------------------------------------Tab5 Starts----------------------------------------------------#
+  
+  tabItem(tabName = "usastats", 
+          fluidRow(
+            box(title = "US Confirmed", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("usconfirmed")),
+            box(title = "US Deaths", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("usdeaths")),
+            box(title = "US Recovered", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("usrecovered")),
+            box(title = "US Active", background= "purple",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("usactive"))
+          ),
+          
+          fluidRow(
+            box(title = "Confirmed/Day", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("usconfirmed_inc")),
+            box(title = "Deaths/Day", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("usdeaths_inc")),
+            box(title = "Recovered/Day", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("usrecovered_inc")),
+            box(title = "Mortality %", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("usmortality"))
+          ),
+          
+          fluidRow(
+            box(title = "Forecasting of Confirmed Cases", background= "orange",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("forecaseting_confirmed_us")),
+            box(title = "Forecasting of Death Cases", background= "orange",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("forecaseting_deaths_us"))
+          )
+  ),
+  
+  #-------------------------------------------------------Tab6 Starts----------------------------------------------------#
+  
+  tabItem(tabName = "forecasts", 
+          fluidRow(
+            box(title = "World Confirmed Forecasts", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("worldconfirmed_forecast")),
+            box(title = "World Deaths Forecasts", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("worlddeaths_forecast"))
+          ),
+          
+          fluidRow(
+            box(title = "Indian Confirmed Forecasts", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("indianconfirmed_forecast")),
+            box(title = "Indian Deaths Forecasts", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("indiandeaths_forecast"))
+          ),
+          
+          fluidRow(
+            box(title = "US Confirmed Forecasts", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("usconfirmed_forecast")),
+            box(title = "US Deaths Forecasts", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("usdeaths_forecast"))
+          )
   ) 
+
+  #-------------------------------------------------------End of Tabs----------------------------------------------------#
   
 )
 )
@@ -420,21 +465,61 @@ server = function(input, output) {
   Indian_Mortality = round((data4$deaths/data4$confirmed)*100,digits = 2)
   Indian_Mortality = sprintf("%3g%%", Indian_Mortality)
   
+  
+  #-----------------------------------------USA Analytics-----------------------------#
+  
+  data10 = filter(data2, Country=="US")
+  
+  data11 = filter(data3, Country=="US")
+  
+  
+  #---------------------- Confirmed Cases--------------------------------#
+  
+  US_Confirmed = data10$confirmed%>%sum()%>%comma()
+  
+  #---------------------- Deaths Cases--------------------------------#
+  
+  US_Deaths = data10$deaths%>%sum()%>%comma()
+  
+  #----------------------- Recovered Cases-------------------------#
+  
+  US_Recovered = data10$recovered%>%sum()%>%comma()
+  
+  #----------------------- Active Cases----------------------------#
+  
+  Us_Active = data10$active%>%sum()%>%comma()
+  
+  US_Confirmed_Increase = (data10$confirmed - data11$confirmed)%>%comma()
+  
+  US_Deaths_Increase = (data10$deaths - data11$deaths)%>%comma()
+  
+  US_Recovered_Increase = (data10$recovered - data11$recovered)%>%comma()
+  
+  #------------------------------- Mortality % ------------------------#
+   
+  US_Mortality = round((data10$deaths/data10$confirmed)*100,digits = 2)
+  US_Mortality = sprintf("%3g%%", US_Mortality)
+  
   #--------------------------------------------- Forecasting ----------------------------------#
   
-  #------------------------ Forecasting World Plot----------------------------#
   
-  # World Confirmed Case
+  #-------------------------------------Next 15 days Dates--------------------------------------#
   
   ds_dates = if (date1 == 1) {
-    data.frame(date = c(Sys.Date(),Sys.Date()+1,Sys.Date()+2,Sys.Date()+3,Sys.Date()+4,Sys.Date()+5,
+    data.frame(Date = c(Sys.Date(),Sys.Date()+1,Sys.Date()+2,Sys.Date()+3,Sys.Date()+4,Sys.Date()+5,
                         Sys.Date()+6,Sys.Date()+7,Sys.Date()+8,Sys.Date()+9,Sys.Date()+10,Sys.Date()+11,Sys.Date()+12,Sys.Date()+13,Sys.Date()+14))
   } else {
-    data.frame(date = c(Sys.Date()-1,Sys.Date(),Sys.Date()+1,Sys.Date()+2,Sys.Date()+3,Sys.Date()+4,Sys.Date()+5,
+    data.frame(Date = c(Sys.Date()-1,Sys.Date(),Sys.Date()+1,Sys.Date()+2,Sys.Date()+3,Sys.Date()+4,Sys.Date()+5,
                         Sys.Date()+6,Sys.Date()+7,Sys.Date()+8,Sys.Date()+9,Sys.Date()+10,Sys.Date()+11,Sys.Date()+12,Sys.Date()+13))
     
   }
   
+  d = (data[1,"Date"])
+  ds_date1 = c(d+1,d+2,d+3,d+4,d+5,d+6,+d+7,d+8,d+9,d+10,d+11,d+12,d+13,d+14,d+15)
+  ds_date1 = t(ds_date1)
+  #-------------------------------------Next 15 days Dates--------------------------------------#
+   
+  #------------------------------------ World Confirmed Case------------------------------------#
   
   df1 = data%>%group_by(Date)%>%summarise(confirmed = sum(confirmed),deaths=sum(deaths),recovered = sum(recovered))%>%arrange(Date)%>%select(Date,confirmed)
   
@@ -444,13 +529,22 @@ server = function(input, output) {
   
   future1 = forecast(model1, h = 15,level = 99)%>%data.frame()
   
-  forecastshow1 = future1 ###############################
+  forecastshow1 = future1%>%select(-Point.Forecast) ################################ CI 99%
+  
+  forecastshow1  = round(forecastshow1)
+  
+  forecastshow1$Lo.99= comma(forecastshow1$Lo.99)
+  
+  forecastshow1$Hi.99= comma(forecastshow1$Hi.99)
+  
+  forecastshow1 = cbind(ds_date1,forecastshow1)  ################################ CI 99%
+  
   
   future1[,c("Lo.99","Hi.99")] = list(NULL)
   
   forecast1 = cbind(ds_dates,future1)
   
-  forecast1 = rename(forecast1, Date = date, confirmed = Point.Forecast )
+  forecast1 = rename(forecast1, Date = Date, confirmed = Point.Forecast )
   
   fulldata1 = rbind(df1,forecast1)%>%data.frame()
 
@@ -463,7 +557,7 @@ plot1 = ggplot(fulldata1) +
     theme(legend.position = "none")
   plot1 # World Confirmed Case
   
-  # World Deaths Case
+  #--------------------------------------------- World Deaths Case---------------------------------#
   
   df2 = data%>%group_by(Date)%>%summarise(confirmed = sum(confirmed),deaths=sum(deaths),recovered = sum(recovered))%>%arrange(Date)%>%select(Date,deaths)
   
@@ -473,13 +567,24 @@ plot1 = ggplot(fulldata1) +
   
   future2 = forecast(model2, h = 15,level=99)%>%data.frame()
   
-  forecastshow2 = future2 ################################
+  forecastshow2 = round(future2) ################################ CI 99%
+  
+  forecastshow2 = future2%>%select(-Point.Forecast) 
+  
+  forecastshow2  = round(forecastshow2)
+  
+  forecastshow2$Lo.99= comma(forecastshow2$Lo.99)
+  
+  forecastshow2$Hi.99= comma(forecastshow2$Hi.99)
+  
+  forecastshow2 = cbind(ds_dates,forecastshow2)  ################################ CI 99%
+  
   
   future2[,c("Lo.99","Hi.99")] = list(NULL)
   
   forecast2 = cbind(ds_dates,future2)
   
-  forecast2 = rename(forecast2,Date = date, deaths = Point.Forecast )
+  forecast2 = rename(forecast2,Date = Date, deaths = Point.Forecast )
   
   fulldata2 = rbind(df2,forecast2)%>%data.frame()
   
@@ -493,7 +598,7 @@ plot1 = ggplot(fulldata1) +
   plot2 # World Deaths Case
   
   
-  #Indian Confirmed Case
+  #-------------------------------------Indian Confirmed Case-------------------------------------------#
   
   df3 = filter(data, Country=="India")%>%select(Date,confirmed)%>%arrange(Date)
   
@@ -503,13 +608,22 @@ plot1 = ggplot(fulldata1) +
   
   future3 = forecast(model3, h = 15,level = 99)%>%data.frame()
   
-  forecastshow3 = future3 ###################################
+  forecastshow3 = future3%>%select(-Point.Forecast) ############################### CI
+  
+  forecastshow3 = round(forecastshow3)
+  
+  forecastshow3$Lo.99= comma(forecastshow3$Lo.99)
+  
+  forecastshow3$Hi.99= comma(forecastshow3$Hi.99)
+  
+  forecastshow3 = cbind(ds_dates,forecastshow3)  ############################### CI
+  
   
   future3[,c("Lo.99","Hi.99")] = list(NULL)
   
   forecast3 = cbind(ds_dates,future3)
   
-  forecast3 = rename(forecast3,Date = date, confirmed = Point.Forecast )
+  forecast3 = rename(forecast3,Date = Date, confirmed = Point.Forecast )
   
   fulldata3 = rbind(df3,forecast3)
   
@@ -523,7 +637,7 @@ plot1 = ggplot(fulldata1) +
   plot3 # Indian Confirmed Case
   
   
-  #Indian Deaths Case
+  #---------------------------------------------Indian Deaths Case------------------------------------#
   
   df4 = filter(data, Country=="India")%>%select(Date,deaths)%>%arrange(Date)
   
@@ -533,13 +647,22 @@ plot1 = ggplot(fulldata1) +
   
   future4 = forecast(model4, h = 15,level = 99)%>%data.frame()
   
-  forecastshow4 = future4
+  
+  forecastshow4 = future4%>%select(-Point.Forecast) ############################### CI
+  
+  forecastshow4 = round(forecastshow4)
+  
+  forecastshow4$Lo.99= comma(forecastshow4$Lo.99)
+  
+  forecastshow4$Hi.99= comma(forecastshow4$Hi.99)
+  
+  forecastshow4 = cbind(ds_dates,forecastshow4)  ############################### CI
   
   future4[,c("Lo.99","Hi.99")] = list(NULL)
   
   forecast4 = cbind(ds_dates,future4)
   
-  forecast4 = rename(forecast4,Date = date, deaths = Point.Forecast )
+  forecast4 = rename(forecast4,Date = Date, deaths = Point.Forecast )
   
   fulldata4 = rbind(df4,forecast4)
   
@@ -553,9 +676,87 @@ plot1 = ggplot(fulldata1) +
   plot4 # Indian Deaths Case
   
   
+  #-------------------------------------USA Confirmed Case-------------------------------------------#
+  
+  df5 = filter(data, Country=="US")%>%select(Date,confirmed)%>%arrange(Date)
+  
+  data_ts5 = ts(df5$confirmed, start=c(2020, 1), end=c(2020,nrow(df5)), frequency= nrow(df5)) 
+  
+  model5 = auto.arima(data_ts5,trace = T) 
+  
+  future5 = forecast(model5, h = 15,level = 99)%>%data.frame()
+  
+  
+  forecastshow5 = future5%>%select(-Point.Forecast) ############################### CI
+  
+  forecastshow5 = round(forecastshow5)
+  
+  forecastshow5$Lo.99= comma(forecastshow5$Lo.99)
+  
+  forecastshow5$Hi.99= comma(forecastshow5$Hi.99)
+  
+  forecastshow5 = cbind(ds_dates,forecastshow5)  ############################### CI
+  
+  future5[,c("Lo.99","Hi.99")] = list(NULL)
+  
+  forecast5 = cbind(ds_dates,future5)
+  
+  forecast5 = rename(forecast5,Date = Date, confirmed = Point.Forecast )
+  
+  fulldata5 = rbind(df5,forecast5)
+  
+  plot5 =   ggplot(fulldata5) +
+    aes(x = Date, y = confirmed) +
+    geom_line(size=1.25,colour = "#d8576b") +
+    labs(x = "No. of Days", y = "Number of Confirmed Cases", subtitle = "Forecasting for next 15 Days") +
+    ggthemes::theme_gdocs() +
+    theme(legend.position = "none")
+  
+  plot5 # US Confirmed Case
+  
+  
+  #---------------------------------------------USA Deaths Case------------------------------------#
+  
+  df6 = filter(data, Country=="US")%>%select(Date,deaths)%>%arrange(Date)
+  
+  data_ts6 = ts(df6$deaths, start=c(2020, 1), end=c(2020,nrow(df6)), frequency= nrow(df6)) 
+  
+  model6 = auto.arima(data_ts6,trace = T) 
+  
+  future6 = forecast(model6, h = 15,level = 99)%>%data.frame()
+  
+  
+  forecastshow6 = future6%>%select(-Point.Forecast) ############################### CI
+  
+  forecastshow6 = round(forecastshow6)
+  
+  forecastshow6$Lo.99= comma(forecastshow6$Lo.99)
+  
+  forecastshow6$Hi.99= comma(forecastshow6$Hi.99)
+  
+  forecastshow6 = cbind(ds_dates,forecastshow6)  ############################### CI
+  
+  future6[,c("Lo.99","Hi.99")] = list(NULL)
+  
+  forecast6 = cbind(ds_dates,future6)
+  
+  forecast6 = rename(forecast6,Date = Date, deaths = Point.Forecast )
+  
+  fulldata6 = rbind(df6,forecast6)
+  
+  plot6 =   ggplot(fulldata6) +
+    aes(x = Date, y = deaths) +
+    geom_line(size=1.25,colour = "#d8576b") +
+    labs(x = "No. of Days", y = "Number of Death Cases", subtitle = "Forecasting for next 15 Days") +
+    ggthemes::theme_gdocs() +
+    theme(legend.position = "none")
+  
+  plot6 # US Deaths Case
+  
+  
   #------------------------------------------------------Calculation Ends--------------------------------------------------------------#  
   
-  
+  #---------------------------------------Server Outputs---------------------------------------#
   
   #-------------------------- For 1st tab ------------------------------#
   
@@ -604,6 +805,29 @@ plot1 = ggplot(fulldata1) +
   output$indianmortality = renderText(Indian_Mortality)
   output$forecaseting_confirmed_india = renderPlot(plot3)
   output$forecaseting_deaths_india = renderPlot(plot4)
+  
+  #-------------------------- For 5th tab ------------------------------#
+  
+  output$usconfirmed = renderText(US_Confirmed)
+  output$usdeaths = renderText(US_Deaths)
+  output$usrecovered = renderText(US_Recovered)
+  output$usactive = renderText(Us_Active)
+  output$usconfirmed_inc = renderText(US_Confirmed_Increase)
+  output$usdeaths_inc = renderText(US_Deaths_Increase)
+  output$usrecovered_inc = renderText(US_Recovered_Increase)
+  output$usmortality = renderText(US_Mortality)
+  output$forecaseting_confirmed_us = renderPlot(plot5)
+  output$forecaseting_deaths_us = renderPlot(plot6)
+  
+  
+  #-------------------------- For 6th tab ------------------------------#
+  
+  output$worldconfirmed_forecast = renderTable(forecastshow1)
+  output$worlddeaths_forecast = renderTable(forecastshow2)
+  output$indianconfirmed_forecast = renderTable(forecastshow3)
+  output$indiandeaths_forecast = renderTable(forecastshow4)
+  output$usconfirmed_forecast = renderTable(forecastshow5)
+  output$usdeaths_forecast = renderTable(forecastshow6)
   
 }
 

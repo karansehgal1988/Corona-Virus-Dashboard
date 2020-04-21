@@ -16,7 +16,8 @@ sidebar = dashboardSidebar(width = 200,
                              menuItem("Top5 Incs/day View", tabName = "Increaseperday", icon = icon("list-alt"),badgeLabel = "Old", badgeColor = "green"),
                              menuItem("Indian View", tabName = "indianstats", icon = icon("dashboard"),badgeLabel = "Old", badgeColor = "green"),
                              menuItem("USA View", tabName = "usastats", icon = icon("dashboard"),badgeLabel = "New", badgeColor = "red"),
-                             menuItem("Forecasts", tabName = "forecasts", icon = icon("dashboard"),badgeLabel = "New", badgeColor = "red")
+                             menuItem("Forecasts", tabName = "forecasts", icon = icon("dashboard"),badgeLabel = "New", badgeColor = "red"),
+                             actionButton("show","DATA UPDATION INFO",icon =icon("refresh"))
                            )
 )
 
@@ -32,6 +33,12 @@ body = dashboardBody(tabItems(
             box(title = "Total Recovered", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("total_recovered")),
             box(title = "Total Active", background= "purple",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("total_active"))
           ),
+          
+          fluidRow(
+            box(title = "Forecasting - Total Confirmed", background= "blue",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",textOutput("forecasting_total_confirmed")),
+            box(title = "Forecasting - Total Deaths", background= "red",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",textOutput("forecasting_total_death_inc"))
+          ),  
+          
           
           fluidRow(
             box(title = "Confirmed/Day", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("total_confirmed_inc")),
@@ -126,27 +133,7 @@ body = dashboardBody(tabItems(
             box(title = "Forecasting of Confirmed Cases", background= "orange",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("forecaseting_confirmed_us")),
             box(title = "Forecasting of Death Cases", background= "orange",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("forecaseting_deaths_us"))
           )
-  ),
-  
-  #-------------------------------------------------------Tab6 Starts----------------------------------------------------#
-  
-  tabItem(tabName = "forecasts", 
-          fluidRow(
-            box(title = "World Confirmed Forecasts", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("worldconfirmed_forecast")),
-            box(title = "World Deaths Forecasts", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("worlddeaths_forecast"))
-          ),
-          
-          fluidRow(
-            box(title = "Indian Confirmed Forecasts", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("indianconfirmed_forecast")),
-            box(title = "Indian Deaths Forecasts", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("indiandeaths_forecast"))
-          ),
-          
-          fluidRow(
-            box(title = "US Confirmed Forecasts", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("usconfirmed_forecast")),
-            box(title = "US Deaths Forecasts", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("usdeaths_forecast"))
-          )
-  ) 
-
+  )
   #-------------------------------------------------------End of Tabs----------------------------------------------------#
   
 )
@@ -154,7 +141,7 @@ body = dashboardBody(tabItems(
 
 
 ui <- dashboardPage(skin = "blue",
-                    dashboardHeader(title = span("Coronavirus Status Dashboard",style = "font-family: Arial; font-weight: bold"),titleWidth = 1800),
+                    dashboardHeader(title = span("Coronavirus Dashboard",style = "font-family: Arial; font-weight: bold;font-size: 25px"),titleWidth = 400),
                     sidebar,
                     body
 )
@@ -182,7 +169,9 @@ server = function(input, output) {
   
   data = data%>%group_by(Date,Country)%>%summarise(confirmed = sum(Confirmed),deaths=sum(Deaths),recovered = sum(Recovered))%>%arrange(desc(Date))%>%data.frame()
   
-  date1 = Sys.Date() -  data[1,"Date"]
+  Date = data[1,"Date"]
+  
+  date1 = Sys.Date() -  Date
   
   #----------------------------------- Automatic Data Selection Code for Data Selection--------------------#
   
@@ -245,9 +234,9 @@ server = function(input, output) {
   #------------ Total Confimed Cases-----------#
   
   
-  total_confirmed = data_merged$Confirmed%>%sum()%>%comma()
+  total_confirmed = data_merged$Confirmed%>%sum()
   
-  total_confirmed 
+  total_confirmed1 = total_confirmed%>%comma()  
    
   
   #------------ Top 5 Countries Confirmed Cases No.------------#
@@ -300,9 +289,9 @@ server = function(input, output) {
   
   #--------- Total Deaths Cases---------------#
   
-  total_death = data_merged$Deaths%>%sum()%>%comma()
+  total_death = data_merged$Deaths%>%sum()
 
-  total_death
+  total_death1 = total_death%>%comma()
   
   #------------ Top 5 Countries Deaths Cases No.------------#
   
@@ -351,9 +340,9 @@ server = function(input, output) {
   
   #--------- Total Recovered Cases---------------#
   
-  total_recovered = data_merged$Recovered%>%sum()%>%comma()
+  total_recovered = data_merged$Recovered%>%sum()
   
-  total_recovered
+  total_recovered1 = total_recovered%>%comma()
   
   #------------ Top 5 Countries Recovered Cases No.------------#
   
@@ -398,9 +387,9 @@ server = function(input, output) {
   
   #--------------------------------------- Active Cases Cases Ends--------------------------------#
   
-  total_active = data_merged$Active%>%sum()%>%comma()
+  total_active = data_merged$Active%>%sum()
   
-  total_active
+  total_active1 = total_active%>%comma()
 
   #------------ Top 5 Countries Active Cases No.------------#
 
@@ -439,19 +428,22 @@ server = function(input, output) {
   
   #---------------------- Confirmed Cases--------------------------------#
   
-  Indian_Confirmed = data4$confirmed%>%sum()%>%comma()
+  Indian_Confirmed = data4$confirmed%>%sum()
+  Indian_Confirmed1 = Indian_Confirmed%>%comma()
   
   #---------------------- Deaths Cases--------------------------------#
   
-  Indian_Deaths = data4$deaths%>%sum()%>%comma()
-  
+  Indian_Deaths = data4$deaths%>%sum()
+  Indian_Deaths1 = Indian_Deaths%>%comma()
   #----------------------- Recovered Cases-------------------------#
   
-  Indian_Recovered = data4$recovered%>%sum()%>%comma()
-  
+  Indian_Recovered = data4$recovered%>%sum()
+  Indian_Recovered1 = Indian_Recovered%>%comma()
   #----------------------- Active Cases----------------------------#
   
-  Indian_Active = data4$active%>%sum()%>%comma()
+  Indian_Active = data4$active%>%sum()
+  Indian_Active1 = Indian_Active%>%comma()
+  #-------------------- Increase per day -----------------------------#
   
   Indian_Confirmed_Increase = (data4$confirmed - data5$confirmed)%>%comma()
   
@@ -475,19 +467,21 @@ server = function(input, output) {
   
   #---------------------- Confirmed Cases--------------------------------#
   
-  US_Confirmed = data10$confirmed%>%sum()%>%comma()
-  
+  US_Confirmed = data10$confirmed%>%sum()
+  US_Confirmed1 = US_Confirmed%>%comma()
   #---------------------- Deaths Cases--------------------------------#
   
-  US_Deaths = data10$deaths%>%sum()%>%comma()
-  
+  US_Deaths = data10$deaths%>%sum()
+  US_Deaths1 = US_Deaths%>%comma()
   #----------------------- Recovered Cases-------------------------#
   
-  US_Recovered = data10$recovered%>%sum()%>%comma()
-  
+  US_Recovered = data10$recovered%>%sum()
+  US_Recovered1 = US_Recovered%>%comma()
   #----------------------- Active Cases----------------------------#
   
-  Us_Active = data10$active%>%sum()%>%comma()
+  Us_Active = data10$active%>%sum()
+  Us_Active1 = Us_Active%>%comma()
+  #--------------------------Increase per day----------------------------------#
   
   US_Confirmed_Increase = (data10$confirmed - data11$confirmed)%>%comma()
   
@@ -514,9 +508,7 @@ server = function(input, output) {
     
   }
   
-  d = (data[1,"Date"])
-  ds_date1 = c(d+1,d+2,d+3,d+4,d+5,d+6,+d+7,d+8,d+9,d+10,d+11,d+12,d+13,d+14,d+15)
-  ds_date1 = t(ds_date1)
+  
   #-------------------------------------Next 15 days Dates--------------------------------------#
    
   #------------------------------------ World Confirmed Case------------------------------------#
@@ -529,22 +521,17 @@ server = function(input, output) {
   
   future1 = forecast(model1, h = 15,level = 99)%>%data.frame()
   
-  forecastshow1 = future1%>%select(-Point.Forecast) ################################ CI 99%
-  
-  forecastshow1  = round(forecastshow1)
-  
-  forecastshow1$Lo.99= comma(forecastshow1$Lo.99)
-  
-  forecastshow1$Hi.99= comma(forecastshow1$Hi.99)
-  
-  forecastshow1 = cbind(ds_date1,forecastshow1)  ################################ CI 99%
-  
-  
   future1[,c("Lo.99","Hi.99")] = list(NULL)
   
   forecast1 = cbind(ds_dates,future1)
   
   forecast1 = rename(forecast1, Date = Date, confirmed = Point.Forecast )
+  
+  #########
+  forecast_world_confirmed_7 = forecast1[7,"confirmed"]%>%comma()
+  forecast_world_confirmed_15 = forecast1[15,"confirmed"]%>%comma()
+  
+  
   
   fulldata1 = rbind(df1,forecast1)%>%data.frame()
 
@@ -566,19 +553,6 @@ plot1 = ggplot(fulldata1) +
   model2 = auto.arima(data_ts2,trace = T) 
   
   future2 = forecast(model2, h = 15,level=99)%>%data.frame()
-  
-  forecastshow2 = round(future2) ################################ CI 99%
-  
-  forecastshow2 = future2%>%select(-Point.Forecast) 
-  
-  forecastshow2  = round(forecastshow2)
-  
-  forecastshow2$Lo.99= comma(forecastshow2$Lo.99)
-  
-  forecastshow2$Hi.99= comma(forecastshow2$Hi.99)
-  
-  forecastshow2 = cbind(ds_dates,forecastshow2)  ################################ CI 99%
-  
   
   future2[,c("Lo.99","Hi.99")] = list(NULL)
   
@@ -608,17 +582,6 @@ plot1 = ggplot(fulldata1) +
   
   future3 = forecast(model3, h = 15,level = 99)%>%data.frame()
   
-  forecastshow3 = future3%>%select(-Point.Forecast) ############################### CI
-  
-  forecastshow3 = round(forecastshow3)
-  
-  forecastshow3$Lo.99= comma(forecastshow3$Lo.99)
-  
-  forecastshow3$Hi.99= comma(forecastshow3$Hi.99)
-  
-  forecastshow3 = cbind(ds_dates,forecastshow3)  ############################### CI
-  
-  
   future3[,c("Lo.99","Hi.99")] = list(NULL)
   
   forecast3 = cbind(ds_dates,future3)
@@ -646,17 +609,6 @@ plot1 = ggplot(fulldata1) +
   model4 = auto.arima(data_ts4,trace = T) 
   
   future4 = forecast(model4, h = 15,level = 99)%>%data.frame()
-  
-  
-  forecastshow4 = future4%>%select(-Point.Forecast) ############################### CI
-  
-  forecastshow4 = round(forecastshow4)
-  
-  forecastshow4$Lo.99= comma(forecastshow4$Lo.99)
-  
-  forecastshow4$Hi.99= comma(forecastshow4$Hi.99)
-  
-  forecastshow4 = cbind(ds_dates,forecastshow4)  ############################### CI
   
   future4[,c("Lo.99","Hi.99")] = list(NULL)
   
@@ -686,17 +638,6 @@ plot1 = ggplot(fulldata1) +
   
   future5 = forecast(model5, h = 15,level = 99)%>%data.frame()
   
-  
-  forecastshow5 = future5%>%select(-Point.Forecast) ############################### CI
-  
-  forecastshow5 = round(forecastshow5)
-  
-  forecastshow5$Lo.99= comma(forecastshow5$Lo.99)
-  
-  forecastshow5$Hi.99= comma(forecastshow5$Hi.99)
-  
-  forecastshow5 = cbind(ds_dates,forecastshow5)  ############################### CI
-  
   future5[,c("Lo.99","Hi.99")] = list(NULL)
   
   forecast5 = cbind(ds_dates,future5)
@@ -725,17 +666,6 @@ plot1 = ggplot(fulldata1) +
   
   future6 = forecast(model6, h = 15,level = 99)%>%data.frame()
   
-  
-  forecastshow6 = future6%>%select(-Point.Forecast) ############################### CI
-  
-  forecastshow6 = round(forecastshow6)
-  
-  forecastshow6$Lo.99= comma(forecastshow6$Lo.99)
-  
-  forecastshow6$Hi.99= comma(forecastshow6$Hi.99)
-  
-  forecastshow6 = cbind(ds_dates,forecastshow6)  ############################### CI
-  
   future6[,c("Lo.99","Hi.99")] = list(NULL)
   
   forecast6 = cbind(ds_dates,future6)
@@ -753,17 +683,48 @@ plot1 = ggplot(fulldata1) +
   
   plot6 # US Deaths Case
   
+  #---------------------------------------% Contribution of cases-----------------------------------#
+  
+  #World
+  
+ 
+  world_death_per =  sprintf("%3g%%",round((total_death/total_confirmed)*100,digits = 2)) 
+  world_recovered_per =  sprintf("%3g%%",round((total_recovered/total_confirmed)*100,digits = 2))
+  world_active_per =  sprintf("%3g%%",round((total_active/total_confirmed)*100,digits = 2))
+  
+  
+  #India
+  
+  India_death_per = sprintf("%3g%%",round((Indian_Deaths/Indian_Confirmed)*100,digits = 2)) 
+  India_recovered_per =  sprintf("%3g%%",round((Indian_Recovered/Indian_Confirmed)*100,digits = 2))
+  India_active_per =  sprintf("%3g%%",round((Indian_Active/Indian_Confirmed)*100,digits = 2))
+  
+  #USA
+  
+  US_death_per = sprintf("%3g%%",round((US_Deaths/US_Confirmed)*100,digits = 2)) 
+  US_recovered_per =  sprintf("%3g%%",round((US_Recovered/US_Confirmed)*100,digits = 2))
+  US_active_per =  sprintf("%3g%%",round((Us_Active/US_Confirmed)*100,digits = 2))
+  
   
   #------------------------------------------------------Calculation Ends--------------------------------------------------------------#  
+  
+  
+  #-----------------------------------Date Updation Notification--------------------------------------------------#
+  
+  
+  observeEvent(input$show,{
+    showNotification(paste0("Hi There, data is updated till","  ",Date),type = "error",duration = 15)
+  })
   
   #---------------------------------------Server Outputs---------------------------------------#
   
   #-------------------------- For 1st tab ------------------------------#
   
-  output$total_confirmed = renderText(total_confirmed)
-  output$total_death = renderText(total_death)
-  output$total_recovered = renderText(total_recovered)
-  output$total_active = renderText(total_active)
+  output$total_confirmed = renderText(total_confirmed1)
+  output$total_death = renderText(paste0(total_death1,"   ","(",world_death_per,")"))
+  output$total_recovered = renderText(paste0(total_recovered1,"   ","(",world_recovered_per,")"))
+  output$total_active = renderText(paste0(total_active1,"   ","(",world_active_per,")"))
+  output$forecasting_total_confirmed = renderText(paste("7th Day - ",forecast_world_confirmed_7 ," & ","15th Day - ",forecast_world_confirmed_15))
   output$total_confirmed_inc = renderText(data_merged_conf_delta_total)
   output$total_death_inc = renderText(data_merged_deaths_delta_total)
   output$total_recovered_inc = renderText(data_merged_recovered_delta_total)
@@ -795,10 +756,10 @@ plot1 = ggplot(fulldata1) +
   
   #-------------------------- For 4rd tab ------------------------------#
   
-  output$indianconfirmed = renderText(Indian_Confirmed)
-  output$indiandeaths = renderText(Indian_Deaths)
-  output$indianrecovered = renderText(Indian_Recovered)
-  output$indianactive = renderText(Indian_Active)
+  output$indianconfirmed = renderText(Indian_Confirmed1)
+  output$indiandeaths = renderText(paste0(Indian_Deaths1,"   ","(",India_death_per,")"))
+  output$indianrecovered = renderText(paste0(Indian_Recovered1,"   ","(",India_recovered_per,")"))
+  output$indianactive = renderText(paste0(Indian_Active1,"   ","(",India_active_per,")"))
   output$indianconfirmed_inc = renderText(Indian_Confirmed_Increase)
   output$indiandeaths_inc = renderText(Indian_Deaths_Increase)
   output$indianrecovered_inc = renderText(Indian_Recovered_Increase)
@@ -808,10 +769,10 @@ plot1 = ggplot(fulldata1) +
   
   #-------------------------- For 5th tab ------------------------------#
   
-  output$usconfirmed = renderText(US_Confirmed)
-  output$usdeaths = renderText(US_Deaths)
-  output$usrecovered = renderText(US_Recovered)
-  output$usactive = renderText(Us_Active)
+  output$usconfirmed = renderText(US_Confirmed1)
+  output$usdeaths = renderText(paste0(US_Deaths1,"   ","(",US_death_per,")"))
+  output$usrecovered = renderText(paste0(US_Recovered1,"   ","(",US_recovered_per,")"))
+  output$usactive = renderText(paste0(Us_Active1,"   ","(",US_active_per,")"))
   output$usconfirmed_inc = renderText(US_Confirmed_Increase)
   output$usdeaths_inc = renderText(US_Deaths_Increase)
   output$usrecovered_inc = renderText(US_Recovered_Increase)
@@ -820,16 +781,9 @@ plot1 = ggplot(fulldata1) +
   output$forecaseting_deaths_us = renderPlot(plot6)
   
   
-  #-------------------------- For 6th tab ------------------------------#
-  
-  output$worldconfirmed_forecast = renderTable(forecastshow1)
-  output$worlddeaths_forecast = renderTable(forecastshow2)
-  output$indianconfirmed_forecast = renderTable(forecastshow3)
-  output$indiandeaths_forecast = renderTable(forecastshow4)
-  output$usconfirmed_forecast = renderTable(forecastshow5)
-  output$usdeaths_forecast = renderTable(forecastshow6)
-  
 }
 
 #-------------------------------------------------- End of Shiny Dashboard -------------------------------------------#
 shinyApp(ui = ui, server = server)
+
+  

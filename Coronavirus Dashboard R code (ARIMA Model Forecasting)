@@ -16,7 +16,6 @@ sidebar = dashboardSidebar(width = 200,
                              menuItem("Top5 Incs/day View", tabName = "Increaseperday", icon = icon("list-alt"),badgeLabel = "Old", badgeColor = "green"),
                              menuItem("Indian View", tabName = "indianstats", icon = icon("dashboard"),badgeLabel = "Old", badgeColor = "green"),
                              menuItem("USA View", tabName = "usastats", icon = icon("dashboard"),badgeLabel = "New", badgeColor = "red"),
-                             menuItem("Forecasts", tabName = "forecasts", icon = icon("dashboard"),badgeLabel = "New", badgeColor = "red"),
                              actionButton("show","DATA UPDATION INFO",icon =icon("refresh"))
                            )
 )
@@ -28,28 +27,28 @@ body = dashboardBody(tabItems(
   
   tabItem(tabName = "worldstats",
           fluidRow(
-            box(title = "Total Confirmed", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;", textOutput("total_confirmed")),
-            box(title = "Total Deaths", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("total_death")),
-            box(title = "Total Recovered", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("total_recovered")),
-            box(title = "Total Active", background= "purple",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("total_active"))
+            box(title = "Total Confirmed", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 200%;", textOutput("total_confirmed")),
+            box(title = "Total Deaths", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 200%;",textOutput("total_death")),
+            box(title = "Total Recovered", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 200%;",textOutput("total_recovered")),
+            box(title = "Total Active", background= "purple",solidHeader = T, width = 3, collapsible = T,style = "font-size: 200%;",textOutput("total_active"))
           ),
           
           fluidRow(
-            box(title = "Forecasting - Total Confirmed", background= "blue",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",textOutput("forecasting_total_confirmed")),
-            box(title = "Forecasting - Total Deaths", background= "red",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",textOutput("forecasting_total_death_inc"))
+            box(title = "Forecasting - Total Confirmed", background= "blue",solidHeader = T, width = 6, collapsible = T,style = "font-size: 200%;",textOutput("forecasting_total_confirmed")),
+            box(title = "Forecasting - Total Deaths", background= "red",solidHeader = T, width = 6, collapsible = T,style = "font-size: 200%;",textOutput("forecasting_total_death_inc"))
           ),  
           
           
           fluidRow(
-            box(title = "Confirmed/Day", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("total_confirmed_inc")),
-            box(title = "Deaths/Day", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("total_death_inc")),
-            box(title = "Recovered/Day", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("total_recovered_inc")),
-            box(title = "Mortality %", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("mortality_overall"))
+            box(title = "Confirmed/Day", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 200%;",textOutput("total_confirmed_inc")),
+            box(title = "Deaths/Day", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 200%;",textOutput("total_death_inc")),
+            box(title = "Recovered/Day", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 200%;",textOutput("total_recovered_inc")),
+            box(title = "Mortality %", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 200%;",textOutput("mortality_overall"))
           ),  
           
           fluidRow(
-            box(title = "Forecasting of Confirmed Cases", background= "orange",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("forecaseting_confirmed_ww")),
-            box(title = "Forecasting of Death Cases", background= "orange",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("forecaseting_deaths_ww"))
+            box(title = "Forecasting of Confirmed Cases", background= "orange",solidHeader = T, width = 6, collapsible = T,style = "font-size: 200%;",plotOutput("forecaseting_confirmed_ww")),
+            box(title = "Forecasting of Death Cases", background= "orange",solidHeader = T, width = 6, collapsible = T,style = "font-size: 200%;",plotOutput("forecaseting_deaths_ww"))
           ) 
   ),
   
@@ -92,22 +91,22 @@ body = dashboardBody(tabItems(
   
   tabItem(tabName = "indianstats", 
           fluidRow(
-            box(title = "Indian Confirmed", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("indianconfirmed")),
-            box(title = "Indian Deaths", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("indiandeaths")),
-            box(title = "Indian Recovered", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("indianrecovered")),
-            box(title = "Indian Active", background= "purple",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("indianactive"))
+            box(title = "Indian Confirmed", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 200%;",textOutput("indianconfirmed")),
+            box(title = "Indian Deaths", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 200%;",textOutput("indiandeaths")),
+            box(title = "Indian Recovered", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 200%;",textOutput("indianrecovered")),
+            box(title = "Indian Active", background= "purple",solidHeader = T, width = 3, collapsible = T,style = "font-size: 200%;",textOutput("indianactive"))
           ),
           
           fluidRow(
-            box(title = "Confirmed/Day", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("indianconfirmed_inc")),
-            box(title = "Deaths/Day", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("indiandeaths_inc")),
-            box(title = "Recovered/Day", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("indianrecovered_inc")),
-            box(title = "Mortality %", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("indianmortality"))
+            box(title = "Confirmed/Day", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 200%;",textOutput("indianconfirmed_inc")),
+            box(title = "Deaths/Day", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 200%;",textOutput("indiandeaths_inc")),
+            box(title = "Recovered/Day", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 200%;",textOutput("indianrecovered_inc")),
+            box(title = "Mortality %", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 200%;",textOutput("indianmortality"))
           ),
           
           fluidRow(
-            box(title = "Forecasting of Confirmed Cases", background= "orange",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("forecaseting_confirmed_india")),
-            box(title = "Forecasting of Death Cases", background= "orange",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("forecaseting_deaths_india"))
+            box(title = "Forecasting of Confirmed Cases", background= "orange",solidHeader = T, width = 6, collapsible = T,style = "font-size: 200%;",plotOutput("forecaseting_confirmed_india")),
+            box(title = "Forecasting of Death Cases", background= "orange",solidHeader = T, width = 6, collapsible = T,style = "font-size: 200%;",plotOutput("forecaseting_deaths_india"))
           )
   ),
   
@@ -116,22 +115,22 @@ body = dashboardBody(tabItems(
   
   tabItem(tabName = "usastats", 
           fluidRow(
-            box(title = "US Confirmed", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("usconfirmed")),
-            box(title = "US Deaths", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("usdeaths")),
-            box(title = "US Recovered", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("usrecovered")),
-            box(title = "US Active", background= "purple",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("usactive"))
+            box(title = "US Confirmed", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 200%;",textOutput("usconfirmed")),
+            box(title = "US Deaths", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 200%;",textOutput("usdeaths")),
+            box(title = "US Recovered", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 200%;",textOutput("usrecovered")),
+            box(title = "US Active", background= "purple",solidHeader = T, width = 3, collapsible = T,style = "font-size: 200%;",textOutput("usactive"))
           ),
           
           fluidRow(
-            box(title = "Confirmed/Day", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("usconfirmed_inc")),
-            box(title = "Deaths/Day", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("usdeaths_inc")),
-            box(title = "Recovered/Day", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("usrecovered_inc")),
-            box(title = "Mortality %", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 300%;",textOutput("usmortality"))
+            box(title = "Confirmed/Day", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 200%;",textOutput("usconfirmed_inc")),
+            box(title = "Deaths/Day", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 200%;",textOutput("usdeaths_inc")),
+            box(title = "Recovered/Day", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 200%;",textOutput("usrecovered_inc")),
+            box(title = "Mortality %", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 200%;",textOutput("usmortality"))
           ),
           
           fluidRow(
-            box(title = "Forecasting of Confirmed Cases", background= "orange",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("forecaseting_confirmed_us")),
-            box(title = "Forecasting of Death Cases", background= "orange",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("forecaseting_deaths_us"))
+            box(title = "Forecasting of Confirmed Cases", background= "orange",solidHeader = T, width = 6, collapsible = T,style = "font-size: 200%;",plotOutput("forecaseting_confirmed_us")),
+            box(title = "Forecasting of Death Cases", background= "orange",solidHeader = T, width = 6, collapsible = T,style = "font-size: 200%;",plotOutput("forecaseting_deaths_us"))
           )
   )
   #-------------------------------------------------------End of Tabs----------------------------------------------------#
@@ -164,7 +163,7 @@ server = function(input, output) {
   data  = read.csv(url)
   
   data$Date = as_date(data$Date)
-
+  
   data = arrange(data,desc(Date))
   
   data = data%>%group_by(Date,Country)%>%summarise(confirmed = sum(Confirmed),deaths=sum(Deaths),recovered = sum(Recovered))%>%arrange(desc(Date))%>%data.frame()
@@ -227,7 +226,7 @@ server = function(input, output) {
   data_merged = rename(data_merged, Confirmed = confirmed.x, Deaths = deaths.x,Recovered = recovered.x, Active = active.x,
                        Confirmed_Incs = confirmed_delta, Deaths_Incs = deaths_delta,
                        Recovered_Incs = recovered_delta, Active_Incs = active_delta)
-
+  
   #-----------------------------------------------------Confirmed Cases Starts---------------------------------#
   
   
@@ -237,7 +236,7 @@ server = function(input, output) {
   total_confirmed = data_merged$Confirmed%>%sum()
   
   total_confirmed1 = total_confirmed%>%comma()  
-   
+  
   
   #------------ Top 5 Countries Confirmed Cases No.------------#
   
@@ -247,7 +246,7 @@ server = function(input, output) {
   
   
   #------------ Top 5 Countries Confirmed Cases percentage.------------#
-
+  
   data_merged_conf_pr = data_merged%>%select(Country,Confirmed)%>%mutate(Percentage = Confirmed/sum(Confirmed)*100)%>%arrange(desc(Percentage))%>%select(-c(Confirmed))%>%head(5)
   
   data_merged_conf_pr$Percentage = round(data_merged_conf_pr$Percentage,digits = 2)
@@ -268,7 +267,7 @@ server = function(input, output) {
   data_merged_conf_delta_no = data_merged%>%arrange(desc(Confirmed_Incs))%>%select(Country,Confirmed_Incs)%>%head(5)
   data_merged_conf_delta_no$Confirmed_Incs = comma(data_merged_conf_delta_no$Confirmed_Incs)
   data_merged_conf_delta_no 
-
+  
   
   #------------------- Top 5 countries Confirmed delta percentage.----------------#
   
@@ -290,7 +289,7 @@ server = function(input, output) {
   #--------- Total Deaths Cases---------------#
   
   total_death = data_merged$Deaths%>%sum()
-
+  
   total_death1 = total_death%>%comma()
   
   #------------ Top 5 Countries Deaths Cases No.------------#
@@ -316,7 +315,7 @@ server = function(input, output) {
   
   data_merged_deaths_delta_total
   
-
+  
   #------------------- Top 5 countries deaths delta no.----------------#
   
   data_merged_deaths_delta_no = data_merged%>%arrange(desc(Deaths_Incs))%>%select(Country,Deaths_Incs)%>%head(5)
@@ -390,9 +389,9 @@ server = function(input, output) {
   total_active = data_merged$Active%>%sum()
   
   total_active1 = total_active%>%comma()
-
+  
   #------------ Top 5 Countries Active Cases No.------------#
-
+  
   data_merged_active_no = data_merged%>%arrange(desc(Active))%>%select(Country,Active)%>%head(5)
   data_merged_active_no$Active = comma(data_merged_active_no$Active)
   data_merged_active_no
@@ -490,7 +489,7 @@ server = function(input, output) {
   US_Recovered_Increase = (data10$recovered - data11$recovered)%>%comma()
   
   #------------------------------- Mortality % ------------------------#
-   
+  
   US_Mortality = round((data10$deaths/data10$confirmed)*100,digits = 2)
   US_Mortality = sprintf("%3g%%", US_Mortality)
   
@@ -510,7 +509,7 @@ server = function(input, output) {
   
   
   #-------------------------------------Next 15 days Dates--------------------------------------#
-   
+  
   #------------------------------------ World Confirmed Case------------------------------------#
   
   df1 = data%>%group_by(Date)%>%summarise(confirmed = sum(confirmed),deaths=sum(deaths),recovered = sum(recovered))%>%arrange(Date)%>%select(Date,confirmed)
@@ -534,9 +533,9 @@ server = function(input, output) {
   
   
   fulldata1 = rbind(df1,forecast1)%>%data.frame()
-
-
-plot1 = ggplot(fulldata1) +
+  
+  
+  plot1 = ggplot(fulldata1) +
     aes(x = Date, y = confirmed) +
     geom_line(size=1.25,colour = "#d8576b") +
     labs(x = "No. of Days", y = "Number of Confirmed Cases", subtitle = "Forecasting for next 15 Days")+
@@ -687,7 +686,7 @@ plot1 = ggplot(fulldata1) +
   
   #World
   
- 
+  
   world_death_per =  sprintf("%3g%%",round((total_death/total_confirmed)*100,digits = 2)) 
   world_recovered_per =  sprintf("%3g%%",round((total_recovered/total_confirmed)*100,digits = 2))
   world_active_per =  sprintf("%3g%%",round((total_active/total_confirmed)*100,digits = 2))
@@ -786,4 +785,3 @@ plot1 = ggplot(fulldata1) +
 #-------------------------------------------------- End of Shiny Dashboard -------------------------------------------#
 shinyApp(ui = ui, server = server)
 
-  

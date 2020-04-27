@@ -46,8 +46,8 @@ body = dashboardBody(tabItems(
           ),  
           
           fluidRow(
-            box(title = "Forecasting of Confirmed Cases", background= "orange",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("forecaseting_confirmed_ww")),
-            box(title = "Forecasting of Death Cases", background= "orange",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("forecaseting_deaths_ww"))
+            box(title = "Forecasting of Confirmed Cases", background= "light-blue",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("forecaseting_confirmed_ww")),
+            box(title = "Forecasting of Death Cases", background= "light-blue",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("forecaseting_deaths_ww"))
           ) 
   ),
   
@@ -56,7 +56,8 @@ body = dashboardBody(tabItems(
   tabItem(tabName = "visual1",
           fluidRow(
             box(title = "Confirmed/day", background= "purple",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;", plotOutput("worldvisual_confirmed")),
-            box(title = "Deaths/day", background= "purple",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("worldvisual_deaths"))
+            box(title = "Deaths/day", background= "purple",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("worldvisual_deaths")),
+            box(title = "Recovered/day", background= "purple",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("worldvisual_recovered"))
            )
           
           ),
@@ -119,8 +120,8 @@ body = dashboardBody(tabItems(
           ),
           
           fluidRow(
-            box(title = "Forecasting of Confirmed Cases", background= "orange",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("forecaseting_confirmed_india")),
-            box(title = "Forecasting of Death Cases", background= "orange",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("forecaseting_deaths_india"))
+            box(title = "Forecasting of Confirmed Cases", background= "light-blue",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("forecaseting_confirmed_india")),
+            box(title = "Forecasting of Death Cases", background= "light-blue",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("forecaseting_deaths_india"))
           )
   ),
   
@@ -130,7 +131,8 @@ body = dashboardBody(tabItems(
    tabItem(tabName = "visual2",
           fluidRow(
             box(title = "Confirmed/day", background= "purple",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;", plotOutput("indiavisual_confirmed")),
-            box(title = "Deaths/day", background= "purple",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("indiavisual_deaths"))
+            box(title = "Deaths/day", background= "purple",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("indiavisual_deaths")),
+            box(title = "Recovered/day", background= "purple",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("indiavisual_recovered"))
           )
           ),
           
@@ -158,8 +160,8 @@ body = dashboardBody(tabItems(
           ),
           
           fluidRow(
-            box(title = "Forecasting of Confirmed Cases", background= "orange",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("forecaseting_confirmed_us")),
-            box(title = "Forecasting of Death Cases", background= "orange",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("forecaseting_deaths_us"))
+            box(title = "Forecasting of Confirmed Cases", background= "light-blue",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("forecaseting_confirmed_us")),
+            box(title = "Forecasting of Death Cases", background= "light-blue",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("forecaseting_deaths_us"))
           )
   ),
   
@@ -168,7 +170,8 @@ body = dashboardBody(tabItems(
   tabItem(tabName = "visual3",
           fluidRow(
             box(title = "Confirmed/day", background= "purple",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("usavisual_confirmed")),
-            box(title = "Deaths/day", background= "purple",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("usavisual_deaths"))
+            box(title = "Deaths/day", background= "purple",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("usavisual_deaths")),
+            box(title = "Recovered/day", background= "purple",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("usavisual_recovered"))
     )
   )
   
@@ -178,10 +181,10 @@ body = dashboardBody(tabItems(
 )
 
 
-ui = tagList(dashboardPage(skin = "blue",
+ui = dashboardPage(skin = "blue",
                     dashboardHeader(title = span("Coronavirus Dashboard",style = "font-family: Arial; font-weight: bold;font-size: 25px"),titleWidth = 400),
                     sidebar,
-                    body), tags$footer("Designed by Karan Sehgal",align = "center",style="position:absolute;bottom:0;width:100%;height:30px;color:white ;padding;30px;background-color:black;z-index:1000;"))
+                    body)
 
 # Preview the UI in the console
 server = function(input, output) {
@@ -471,7 +474,7 @@ plot31 = ggplot(data32) +
  geom_line(size = 1L) +
  scale_color_gradient() +
  labs(x = "Date", y = "Confirmed Increase", title = "Confirmed Increase/day") +
- ggthemes::theme_gdocs()
+ ggthemes::theme_gdocs()+stat_smooth(method = "auto")
 
   # For Deaths
   
@@ -485,7 +488,20 @@ plot31 = ggplot(data32) +
     geom_line(size = 1L) +
     scale_color_gradient() +
     labs(x = "Date", y = "Deaths Increase", title = "Deaths Increase/day") +
-    ggthemes::theme_gdocs()
+    ggthemes::theme_gdocs()+stat_smooth(method = "auto")
+  
+  #For recovered
+  
+  data34 = data31%>%select(c("Date","recovered"))
+  data34 = mutate(data34[-1,],Variation = diff(data34$recovered)*(-1))
+  data34$recovered = NULL
+  
+  plot33 = ggplot(data34) +
+    aes(x = Date, y = Variation, colour = Variation) +
+    geom_line(size = 1L) +
+    scale_color_gradient() +
+    labs(x = "Date", y = "Recovered Increase", title = "Recovered Increase/day") +
+    ggthemes::theme_gdocs()+stat_smooth(method = "auto")
   
   #----------------------------------------- India Analytics-----------------------------#
   
@@ -540,7 +556,7 @@ plot31 = ggplot(data32) +
     geom_line(size = 1L) +
     scale_color_gradient() +
     labs(x = "Date", y = "Confirmed Increase", title = "Confirmed Increase/day") +
-    ggthemes::theme_gdocs()
+    ggthemes::theme_gdocs()+stat_smooth(method = "auto")
   
   #For Deaths
   data22 = data20%>%select(c("Date","deaths"))
@@ -553,7 +569,20 @@ plot31 = ggplot(data32) +
     geom_line(size = 1L) +
     scale_color_gradient() +
     labs(x = "Date", y = "Deaths Increase", title = "Deaths Increase/day") +
-    ggthemes::theme_gdocs()
+    ggthemes::theme_gdocs()+stat_smooth(method = "auto")
+  
+  #For Recovered
+  data23 = data20%>%select(c("Date","recovered"))
+  data23 = mutate(data23[-1,],Variation = diff(data23$recovered)*(-1))
+  data23$recovered = NULL 
+  
+  
+  plot23 = ggplot(data23) +
+    aes(x = Date, y = Variation, colour = Variation) +
+    geom_line(size = 1L) +
+    scale_color_gradient() +
+    labs(x = "Date", y = "Recovered Increase", title = "Recovered Increase/day") +
+    ggthemes::theme_gdocs()+stat_smooth(method = "auto")
   
   #-----------------------------------------USA Analytics-----------------------------#
   
@@ -593,30 +622,45 @@ plot31 = ggplot(data32) +
   US_Mortality = sprintf("%3g%%", US_Mortality)
   
   #---------------------------------USA Increase Per/Day Visualization-------------------------------------------#
-  
+  ### Confirmed Cases
   data23 = data30%>%select(c("Date","confirmed"))
   data23 = mutate(data23[-1,],Variation = diff(data23$confirmed)*(-1))
   data23$confirmed = NULL 
   
-  plot23 = ggplot(data23) +
+  plot24 = ggplot(data23) +
     aes(x = Date, y = Variation, colour = Variation) +
     geom_line(size = 1L) +
     scale_color_gradient() +
     labs(x = "Date", y = "Confirmed Increase", title = "Confirmed Increase/day") +
-    ggthemes::theme_gdocs()
+    ggthemes::theme_gdocs()+stat_smooth(method = "auto")
   
+  
+  ### Death Cases
   data24 = data30%>%select(c("Date","deaths"))
   data24 = mutate(data24[-1,],Variation = diff(data24$deaths)*(-1))
   data24$deaths = NULL 
   
   
-  plot24 = ggplot(data24) +
+  plot25 = ggplot(data24) +
     aes(x = Date, y = Variation, colour = Variation) +
     geom_line(size = 1L) +
     scale_color_gradient() +
     labs(x = "Date", y = "Deaths Increase", title = "Deaths Increase/day") +
-    ggthemes::theme_gdocs()
+    ggthemes::theme_gdocs()+stat_smooth(method = "auto")
   
+  
+  ### Recovered Cases
+  data25 = data30%>%select(c("Date","recovered"))
+  data25 = mutate(data25[-1,],Variation = diff(data25$recovered)*(-1))
+  data25$recovered = NULL 
+  
+  
+  plot26 = ggplot(data25) +
+    aes(x = Date, y = Variation, colour = Variation) +
+    geom_line(size = 1L) +
+    scale_color_gradient() +
+    labs(x = "Date", y = "Recovered Increase", title = "Recovered Increase/day") +
+    ggthemes::theme_gdocs()+stat_smooth(method = "auto")
   
   #--------------------------------------------- Forecasting ----------------------------------#
   
@@ -811,8 +855,8 @@ plot1 = ggplot(fulldata1) +
   forecast6 = rename(forecast6,Date = Date, deaths = Point.Forecast )
   
   ######
-  forecast_usa_deaths_7 = forecast4[7,"deaths"]%>%comma()
-  forecast_usa_deaths_15 = forecast4[15,"deaths"]%>%comma()
+  forecast_usa_deaths_7 = forecast6[7,"deaths"]%>%comma()
+  forecast_usa_deaths_15 = forecast6[15,"deaths"]%>%comma()
   
   fulldata6 = rbind(df6,forecast6)
   plot6 =   ggplot(fulldata6) +
@@ -865,8 +909,8 @@ plot1 = ggplot(fulldata1) +
   output$total_death = renderText(paste0(total_death1,"   ","(",world_death_per,")"))
   output$total_recovered = renderText(paste0(total_recovered1,"   ","(",world_recovered_per,")"))
   output$total_active = renderText(paste0(total_active1,"   ","(",world_active_per,")"))
-  output$world_forecasting_total_confirmed = renderText(paste("7th Day - ",forecast_world_confirmed_7 ," & ","15th Day - ",forecast_world_confirmed_15))
-  output$world_forecasting_total_death = renderText(paste("7th Day - ",forecast_world_deaths_7 ," & ","15th Day - ",forecast_world_deaths_15))
+  output$world_forecasting_total_confirmed = renderText(paste(Date+7,"Day --- ",forecast_world_confirmed_7 ," & ",Date+15,"Day --- ",forecast_world_confirmed_15))
+  output$world_forecasting_total_death = renderText(paste(Date+7,"Day --- ",forecast_world_deaths_7 ," & ",Date+15,"Day --- ",forecast_world_deaths_15))
   output$total_confirmed_inc = renderText(data_merged_conf_delta_total)
   output$total_death_inc = renderText(data_merged_deaths_delta_total)
   output$total_recovered_inc = renderText(data_merged_recovered_delta_total)
@@ -875,6 +919,7 @@ plot1 = ggplot(fulldata1) +
   output$forecaseting_deaths_ww = renderPlot(plot2)
   output$worldvisual_confirmed = renderPlot(plot31)
   output$worldvisual_deaths = renderPlot(plot32)
+  output$worldvisual_recovered = renderPlot(plot33)
   #------------------------------- For 2nd tab-----------------------------#
   
   output$top5confirmedno = renderTable(data_merged_conf_no, digits = 0)
@@ -903,8 +948,8 @@ plot1 = ggplot(fulldata1) +
   output$indiandeaths = renderText(paste0(Indian_Deaths1,"   ","(",India_death_per,")"))
   output$indianrecovered = renderText(paste0(Indian_Recovered1,"   ","(",India_recovered_per,")"))
   output$indianactive = renderText(paste0(Indian_Active1,"   ","(",India_active_per,")"))
-  output$india_forecasting_total_confirmed = renderText(paste("7th Day - ",forecast_india_confirmed_7 ," & ","15th Day - ",forecast_india_confirmed_15))
-  output$india_forecasting_total_death = renderText(paste("7th Day - ",forecast_india_deaths_7 ," & ","15th Day - ",forecast_india_deaths_15))
+  output$india_forecasting_total_confirmed = renderText(paste(Date+7,"Day --- ",forecast_india_confirmed_7 ," & ",Date+15,"Day --- ",forecast_india_confirmed_15))
+  output$india_forecasting_total_death = renderText(paste(Date+7,"Day --- ",forecast_india_deaths_7 ," & ",Date+15,"Day --- ",forecast_india_deaths_15))
   output$indianconfirmed_inc = renderText(Indian_Confirmed_Increase)
   output$indiandeaths_inc = renderText(Indian_Deaths_Increase)
   output$indianrecovered_inc = renderText(Indian_Recovered_Increase)
@@ -913,6 +958,7 @@ plot1 = ggplot(fulldata1) +
   output$forecaseting_deaths_india = renderPlot(plot4)
   output$indiavisual_confirmed = renderPlot(plot21)
   output$indiavisual_deaths = renderPlot(plot22)
+  output$indiavisual_recovered = renderPlot(plot23)
   
   #-------------------------- For 5th tab ------------------------------#
   
@@ -920,16 +966,17 @@ plot1 = ggplot(fulldata1) +
   output$usdeaths = renderText(paste0(US_Deaths1,"   ","(",US_death_per,")"))
   output$usrecovered = renderText(paste0(US_Recovered1,"   ","(",US_recovered_per,")"))
   output$usactive = renderText(paste0(Us_Active1,"   ","(",US_active_per,")"))
-  output$usa_forecasting_total_confirmed = renderText(paste("7th Day - ",forecast_usa_confirmed_7 ," & ","15th Day - ",forecast_usa_confirmed_15))
-  output$usa_forecasting_total_death = renderText(paste("7th Day - ",forecast_usa_deaths_7 ," & ","15th Day - ",forecast_usa_deaths_15))
+  output$usa_forecasting_total_confirmed = renderText(paste(Date+7,"Day --- ",forecast_usa_confirmed_7 ," & ",Date+15,"Day --- ",forecast_usa_confirmed_15))
+  output$usa_forecasting_total_death = renderText(paste(Date+7,"Day --- ",forecast_usa_deaths_7 ," & ",Date+15,"Day --- ",forecast_usa_deaths_15))
   output$usconfirmed_inc = renderText(US_Confirmed_Increase)
   output$usdeaths_inc = renderText(US_Deaths_Increase)
   output$usrecovered_inc = renderText(US_Recovered_Increase)
   output$usmortality = renderText(US_Mortality)
   output$forecaseting_confirmed_us = renderPlot(plot5)
   output$forecaseting_deaths_us = renderPlot(plot6)
-  output$usavisual_confirmed = renderPlot(plot23)
-  output$usavisual_deaths = renderPlot(plot24)
+  output$usavisual_confirmed = renderPlot(plot24)
+  output$usavisual_deaths = renderPlot(plot25)
+  output$usavisual_recovered = renderPlot(plot26)
   
 }
 

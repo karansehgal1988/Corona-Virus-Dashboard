@@ -3,19 +3,23 @@ options(scipen = 999)
 library(shiny)
 library(shinydashboard)
 library(lubridate)
-library(ggplot2)
 library(scales)
 library(forecast)
 library(tseries)
 library(dplyr)
+library(ggplot2)
+library(ggthemes)
+library(rnaturalearth)
+library(rnaturalearthdata)
 
-sidebar = dashboardSidebar(width = 180,
+sidebar = dashboardSidebar(width = 190,
                            sidebarMenu(
                              menuItem("Global View", icon = icon("dashboard"),menuSubItem("Statistics",tabName = "worldstats",icon = icon("table")),menuSubItem("Incs/Day Graph",tabName = "visual1", icon = icon("list-alt"))),
                              menuItem("Top5 Countries",icon = icon("table"),menuSubItem("Top Countires",tabName = "top5",icon = icon("table")),menuSubItem("Top5 Incs/day",tabName = "Increaseperday", icon = icon("list-alt"))),
                              menuItem("Indian View", icon = icon("dashboard"),menuSubItem("Statistics",tabName = "indianstats",icon = icon("table")),menuSubItem("Incs/Day Graph",tabName = "visual2", icon = icon("list-alt"))),
                              menuItem("USA View", tabName = "usastats", icon = icon("dashboard"),menuSubItem("Statistics",tabName = "usastats",icon = icon("table")),menuSubItem("Incs/Day Graph",tabName = "visual3", icon = icon("list-alt"))),
-                             actionButton("show","DATA UPDATION INFO",icon =icon("refresh"))
+                             menuItem("Geo Spatial View", tabName = "geo", icon = icon("list-alt"),badgeLabel = "New", badgeColor = "red"),
+                             actionButton("show","DATA UPDATE INFO",icon =icon("refresh"))
                            )
 )
 
@@ -23,6 +27,9 @@ sidebar = dashboardSidebar(width = 180,
 body = dashboardBody(tabItems(
   
   #-------------------------------------------------------Tab1 Starts----------------------------------------------------#
+  
+  
+  #-------------------------------------------------------sub1 Tab1 Starts----------------------------------------------------#
   
   tabItem(tabName = "worldstats",
           fluidRow(
@@ -51,7 +58,7 @@ body = dashboardBody(tabItems(
           ) 
   ),
   
-  #-------------------------------------------------------Sub Tab1 Starts----------------------------------------------------#
+  #-------------------------------------------------------Sub2 Tab1 Starts----------------------------------------------------#
   
   tabItem(tabName = "visual1",
           fluidRow(
@@ -63,6 +70,8 @@ body = dashboardBody(tabItems(
           ),
   
   #-------------------------------------------------------Tab2 Starts----------------------------------------------------#
+  
+  #-------------------------------------------------------Sub1 Tab2 Starts----------------------------------------------------#
   
   tabItem(tabName = "top5", 
           fluidRow(
@@ -81,7 +90,7 @@ body = dashboardBody(tabItems(
   ),
   
   
-  #-------------------------------------------------------Tab3 Starts----------------------------------------------------#
+  #-------------------------------------------------------Sub2 Tab2 Starts----------------------------------------------------#
   
   tabItem(tab = "Increaseperday",
           
@@ -97,7 +106,9 @@ body = dashboardBody(tabItems(
           )
   ),
   
-  #-------------------------------------------------------Tab4 Starts----------------------------------------------------#
+  #-------------------------------------------------------Tab3 Starts----------------------------------------------------#
+  
+  #-------------------------------------------------------Sub1 Tab3 Starts----------------------------------------------------#
   
   tabItem(tabName = "indianstats", 
           fluidRow(
@@ -126,7 +137,7 @@ body = dashboardBody(tabItems(
   ),
   
  
-  #-------------------------------------------------------Sub Tab4 Starts----------------------------------------------------#
+  #-------------------------------------------------------Sub2 Tab3 Starts----------------------------------------------------#
   
    tabItem(tabName = "visual2",
           fluidRow(
@@ -136,8 +147,10 @@ body = dashboardBody(tabItems(
           )
           ),
           
+    #-------------------------------------------------------Tab4 Starts----------------------------------------------------#
   
-  #-------------------------------------------------------Tab5 Starts----------------------------------------------------#
+  #-------------------------------------------------------Sub1 Tab4 Starts----------------------------------------------------#
+  
   
   tabItem(tabName = "usastats", 
           fluidRow(
@@ -165,7 +178,7 @@ body = dashboardBody(tabItems(
           )
   ),
   
-  #-------------------------------------------------------Sub Tab5 Starts----------------------------------------------------#  
+  #-------------------------------------------------------Sub2 Tab4 Starts----------------------------------------------------#  
   
   tabItem(tabName = "visual3",
           fluidRow(
@@ -173,8 +186,27 @@ body = dashboardBody(tabItems(
             box(title = "Deaths/day", background= "purple",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("usavisual_deaths")),
             box(title = "Recovered/day", background= "purple",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("usavisual_recovered"))
     )
-  )
+  ),
   
+  #-------------------------------------------------------Tab5 Starts----------------------------------------------------#
+  
+  
+  
+  tabItem(tabName = "geo", 
+          fluidRow(
+            box(title = "Confirmed", background= "aqua",solidHeader = T, width = 12,collapsible = T,style = "font-size: 300%;",plotOutput("geo_confirmed"))
+            ),
+          
+          fluidRow(
+            box(title = "Deaths", background= "aqua",solidHeader = T, width = 12,collapsible = T,style = "font-size: 300%;",plotOutput("geo_deaths"))
+            
+            ),  
+          
+          fluidRow(
+            box(title = "Recovered", background= "aqua",solidHeader = T, width = 12,collapsible = T,style = "font-size: 300%;",plotOutput("geo_recovered"))
+  
+          )
+          )
   #-------------------------------------------------------End of Tabs----------------------------------------------------#
   
 )
@@ -184,17 +216,20 @@ body = dashboardBody(tabItems(
 ui = dashboardPage(skin = "blue",
                     dashboardHeader(title = span("Coronavirus Dashboard",style = "font-family: Arial; font-weight: bold;font-size: 25px"),titleWidth = 400),
                     sidebar,
-                    body)
+                    body, headerPanel("",windowTitle = "Coronavirus Dashboard"))
 
 # Preview the UI in the console
 server = function(input, output) {
-  
+  options(scipen = 999)
   library(lubridate)
-  library(ggplot2)
   library(scales)
   library(forecast)
   library(tseries)
   library(dplyr)
+  library(ggplot2)
+  library(ggthemes)
+  library(rnaturalearth)
+  library(rnaturalearthdata)
   
   #---------------------------------------------------------Calculations--------------------------------------------------------------#
   
@@ -891,6 +926,50 @@ plot1 = ggplot(fulldata1) +
   US_active_per =  sprintf("%3g%%",round((Us_Active/US_Confirmed)*100,digits = 2))
   
 
+  
+  #--------------------------------------------------Geo Spatial Analysis----------------------------------------------#
+  
+world <- ne_countries(scale = "medium",continent = NULL,geounit = NULL,sovereignty = NULL, returnclass = "sf")%>%rename(Country=sovereignt)%>%select(c("Country","geometry"))
+data100 = data2
+data100$Country = as.character(data100$Country)
+  
+data100$Country = ifelse(data100$Country=="US","United States of America",ifelse(data100$Country=="Bahamas","The Bahamas",ifelse(data100$Country=="Congo (Brazzaville)","Republic of Congo",ifelse(data100$Country=="Congo (Kinshasa)","Democratic Republic of the Congo",
+                  ifelse(data100$Country=="Cote d'Ivoire","Ivory Coast",ifelse(data100$Country=="Cyprus","Northern Cyprus",ifelse(data100$Country=="Czechia","Czech Republic",ifelse(data100$Country=="Guinea-Bissau","Guinea Bissau",
+                  ifelse(data100$Country=="Korea, South","South Korea",ifelse(data100$Country=="North Macedonia","Macedonia",ifelse(data100$Country=="Burma","Myanmar",ifelse(data100$Country=="Serbia","Republic of Serbia",
+                  ifelse(data100$Country=="Taiwan*","Taiwan",ifelse(data100$Country=="Switzerland","Swaziland",ifelse(data100$Country=="Timor-Leste","East Timor",ifelse(data100$Country=="Tanzania","United Republic of Tanzania",data100$Country))))))))))))))))
+  
+  
+data_merged1 = left_join(world,data100,by="Country")
+  
+#Confirmed
+
+geo1 = ggplot(data_merged1) +
+    aes(fill = confirmed) +
+    geom_sf(size = 1L) +
+    scale_fill_distiller(palette = "Paired") +
+    labs(title = "Confirmed") +
+    theme_few()
+
+#Deaths
+  
+geo2 = ggplot(data_merged1) +
+  aes(fill = deaths) +
+  geom_sf(size = 1L) +
+  scale_fill_distiller(palette = "Paired") +
+  labs(title = "Confirmed") +
+  theme_few()
+
+  
+#Recovered
+
+geo3 = ggplot(data_merged1) +
+  aes(fill = recovered) +
+  geom_sf(size = 1L) +
+  scale_fill_distiller(palette = "Paired") +
+  labs(title = "Recovered") +
+  theme_few()
+
+  
   #------------------------------------------------------Calculation Ends--------------------------------------------------------------#  
   
   
@@ -898,13 +977,14 @@ plot1 = ggplot(fulldata1) +
   
   
   observeEvent(input$show,{
-    showNotification(paste0("DATA UPDATED - ","  ",Date),type = "error",duration = 20)
+    showNotification(paste0("DATA UPDATED -- ","  ",Date),type = "error",duration = 30)
   })
   
   #---------------------------------------Server Outputs---------------------------------------#
   
   #-------------------------- For 1st tab ------------------------------#
   
+  #-------------------------- For Sub1 1st tab ------------------------------#
   output$total_confirmed = renderText(total_confirmed1)
   output$total_death = renderText(paste0(total_death1,"   ","(",world_death_per,")"))
   output$total_recovered = renderText(paste0(total_recovered1,"   ","(",world_recovered_per,")"))
@@ -918,9 +998,15 @@ plot1 = ggplot(fulldata1) +
   output$forecaseting_confirmed_ww = renderPlot(plot1)
   output$forecaseting_deaths_ww = renderPlot(plot2)
   output$worldvisual_confirmed = renderPlot(plot31)
+  
+  #-------------------------- For Sub2 1st tab ------------------------------#
+  
   output$worldvisual_deaths = renderPlot(plot32)
   output$worldvisual_recovered = renderPlot(plot33)
+  
   #------------------------------- For 2nd tab-----------------------------#
+  
+  #-------------------------- For Sub1 2nd tab ------------------------------#
   
   output$top5confirmedno = renderTable(data_merged_conf_no, digits = 0)
   output$top5deathsno = renderTable(data_merged_deaths_no,digits = 0)
@@ -932,7 +1018,7 @@ plot1 = ggplot(fulldata1) +
   output$top5activeper = renderTable(data_merged_active_pr)
   
   
-  #------------------------------- For 3rd tab-----------------------------#
+  #-------------------------- For Sub2 2nd tab ------------------------------#
   
   output$top5confirmed_day_no = renderTable(data_merged_conf_delta_no, digits = 0)
   output$top5deaths_day_no = renderTable(data_merged_deaths_delta_no,digits = 0)
@@ -942,7 +1028,9 @@ plot1 = ggplot(fulldata1) +
   output$top5recovered_day_per = renderTable(data_merged_recovered_inc_per)
   
   
-  #-------------------------- For 4rd tab ------------------------------#
+  #-------------------------- For 3rd tab ------------------------------#
+  
+  #-------------------------- For Sub1 3rd tab ------------------------------#
   
   output$indianconfirmed = renderText(Indian_Confirmed1)
   output$indiandeaths = renderText(paste0(Indian_Deaths1,"   ","(",India_death_per,")"))
@@ -957,11 +1045,15 @@ plot1 = ggplot(fulldata1) +
   output$forecaseting_confirmed_india = renderPlot(plot3)
   output$forecaseting_deaths_india = renderPlot(plot4)
   output$indiavisual_confirmed = renderPlot(plot21)
+  
+  #-------------------------- For Sub2 3rd tab ------------------------------#
+  
   output$indiavisual_deaths = renderPlot(plot22)
   output$indiavisual_recovered = renderPlot(plot23)
   
-  #-------------------------- For 5th tab ------------------------------#
+  #-------------------------- For 4th tab ------------------------------#
   
+  #-------------------------- For Sub1 4th tab ------------------------------#
   output$usconfirmed = renderText(US_Confirmed1)
   output$usdeaths = renderText(paste0(US_Deaths1,"   ","(",US_death_per,")"))
   output$usrecovered = renderText(paste0(US_Recovered1,"   ","(",US_recovered_per,")"))
@@ -975,12 +1067,20 @@ plot1 = ggplot(fulldata1) +
   output$forecaseting_confirmed_us = renderPlot(plot5)
   output$forecaseting_deaths_us = renderPlot(plot6)
   output$usavisual_confirmed = renderPlot(plot24)
+  
+  #-------------------------- For Sub2 4th tab ------------------------------#
+  
   output$usavisual_deaths = renderPlot(plot25)
   output$usavisual_recovered = renderPlot(plot26)
+  
+  
+  #---------------------------------For 5th tab---------------------------------------#
+  
+  output$geo_confirmed = renderPlot(geo1)
+  output$geo_deaths = renderPlot(geo2)
+  output$geo_recovered = renderPlot(geo3)
   
 }
 
 #-------------------------------------------------- End of Shiny Dashboard -------------------------------------------#
 shinyApp(ui = ui, server = server)
-
-  

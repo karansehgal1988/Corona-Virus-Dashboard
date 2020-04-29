@@ -26,7 +26,24 @@ sidebar = dashboardSidebar(width = 190,
 )
 
 
-body = dashboardBody(tabItems(
+body = dashboardBody(tags$head(tags$style(HTML(
+  '.myClass { 
+  font-size: 20px;
+  line-height: 50px;
+  text-align: center;
+  font-family: Arial;
+  padding: 0 15px;
+  overflow: hidden;
+  color: white;
+  }
+  '))),
+  tags$script(HTML('
+                   $(document).ready(function() {
+                   $("header").find("nav").append(\'<span class="myClass"> Designed by Karan Sehgal </span>\');
+                   })
+                   ')),
+  
+  tabItems(
   
   #-------------------------------------------------------Tab1 Starts----------------------------------------------------#
   
@@ -218,7 +235,8 @@ body = dashboardBody(tabItems(
 ui = dashboardPage(skin = "blue",
                    dashboardHeader(title = span("Coronavirus Dashboard",style = "font-family: Arial; font-weight: bold;font-size: 25px"),titleWidth = 400),
                    sidebar,
-                   body, headerPanel("",windowTitle = "Coronavirus Dashboard"))
+                   body, headerPanel("",windowTitle = "Coronavirus Dashboard")
+                   )
 
 # Preview the UI in the console
 server = function(input, output) {
@@ -1088,3 +1106,53 @@ server = function(input, output) {
 
 #-------------------------------------------------- End of Shiny Dashboard -------------------------------------------#
 shinyApp(ui = ui, server = server)
+
+
+
+library(shiny)
+library(shinydashboard) 
+ui <- dashboardPage(
+  dashboardHeader(
+    title = "demo"
+  ), 
+  dashboardSidebar(), 
+  dashboardBody(
+    tags$head(tags$style(HTML(
+      '.myClass { 
+      font-size: 20px;
+      line-height: 50px;
+      text-align: left;
+      font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+      padding: 0 15px;
+      overflow: hidden;
+      color: white;
+      }
+      '))),
+    tags$script(HTML('
+                     $(document).ready(function() {
+                     $("header").find("nav").append(\'<span class="myClass"> Designed by Karan Sehgal </span>\');
+                     })
+                     '))
+                     )
+    ) 
+server <- function(input, output) { } 
+shinyApp(ui, server)
+
+
+
+library(shiny)
+library(shinydashboard)
+
+header <- dashboardHeader()
+anchor <- tags$a(href='http://www.example.com',
+                 tags$img(src='logo.png', height='60', width='50'),
+                 'project name')
+
+header$children[[2]]$children <- tags$div(
+  tags$head(tags$style(HTML(".name { background-color: black }"))),
+  anchor,
+  class = 'name')
+
+ui <- dashboardPage(header, dashboardSidebar(), dashboardBody())
+
+shinyApp(ui, server = function(input, output, session) {})

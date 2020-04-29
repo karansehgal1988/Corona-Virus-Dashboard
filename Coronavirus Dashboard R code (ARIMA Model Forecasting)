@@ -14,13 +14,13 @@ library(rnaturalearthdata)
 library(rgeos)
 library(sf)
 
-sidebar = dashboardSidebar(width = 190,
+sidebar = dashboardSidebar(width = 200,
                            sidebarMenu(
-                             menuItem("Global View", icon = icon("dashboard"),menuSubItem("Statistics",tabName = "worldstats",icon = icon("table")),menuSubItem("Incs/Day Graph",tabName = "visual1", icon = icon("list-alt"))),
+                             menuItem("Global View", icon = icon("fas fa-globe"),menuSubItem("Statistics",tabName = "worldstats",icon = icon("fas fa-chart-bar")),menuSubItem("Incs/Day Graph",tabName = "visual1", icon = icon("fas fa-chart-line"))),
                              menuItem("Top5 Countries",icon = icon("table"),menuSubItem("Top Countires",tabName = "top5",icon = icon("table")),menuSubItem("Top5 Incs/day",tabName = "Increaseperday", icon = icon("list-alt"))),
-                             menuItem("Indian View", icon = icon("dashboard"),menuSubItem("Statistics",tabName = "indianstats",icon = icon("table")),menuSubItem("Incs/Day Graph",tabName = "visual2", icon = icon("list-alt"))),
-                             menuItem("USA View", tabName = "usastats", icon = icon("dashboard"),menuSubItem("Statistics",tabName = "usastats",icon = icon("table")),menuSubItem("Incs/Day Graph",tabName = "visual3", icon = icon("list-alt"))),
-                             menuItem("Geo Spatial View", tabName = "geo", icon = icon("list-alt"),badgeLabel = "New", badgeColor = "red"),
+                             menuItem("Indian View", icon = icon("fas fa-rupee-sign"),menuSubItem("Statistics",tabName = "indianstats",icon = icon("fas fa-chart-bar")),menuSubItem("Incs/Day Graph",tabName = "visual2", icon = icon("fas fa-chart-line"))),
+                             menuItem("USA View", tabName = "usastats", icon = icon("fas fa-dollar-sign"),menuSubItem("Statistics",tabName = "usastats",icon = icon("fas fa-chart-bar")),menuSubItem("Incs/Day Graph",tabName = "visual3", icon = icon("fas fa-chart-line"))),
+                             menuItem("Geo Spatial View", tabName = "geo", icon = icon("fas fa-globe-asia"),badgeLabel = "New", badgeColor = "red"),
                              actionButton("show","DATA UPDATE INFO",icon =icon("refresh"))
                            )
 )
@@ -28,11 +28,11 @@ sidebar = dashboardSidebar(width = 190,
 
 body = dashboardBody(tags$head(tags$style(HTML(
   '.myClass { 
-  font-size: 20px;
+  font-size: 15px;
   line-height: 50px;
   text-align: center;
   font-family: Arial;
-  padding: 0 15px;
+  padding: 20px;
   overflow: hidden;
   color: white;
   }
@@ -44,199 +44,199 @@ body = dashboardBody(tags$head(tags$style(HTML(
                    ')),
   
   tabItems(
-  
-  #-------------------------------------------------------Tab1 Starts----------------------------------------------------#
-  
-  
-  #-------------------------------------------------------sub1 Tab1 Starts----------------------------------------------------#
-  
-  tabItem(tabName = "worldstats",
-          fluidRow(
-            box(title = "Total Confirmed", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;", textOutput("total_confirmed")),
-            box(title = "Total Deaths", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("total_death")),
-            box(title = "Total Recovered", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("total_recovered")),
-            box(title = "Total Active", background= "purple",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("total_active"))
-          ),
-          
-          fluidRow(
-            box(title = "Forecasting - Total Confirmed", background= "blue",solidHeader = T, width = 6, collapsible = T,style = "font-size: 150%;",textOutput("world_forecasting_total_confirmed")),
-            box(title = "Forecasting - Total Deaths", background= "red",solidHeader = T, width = 6, collapsible = T,style = "font-size: 150%;",textOutput("world_forecasting_total_death"))
-          ),  
-          
-          
-          fluidRow(
-            box(title = "Confirmed/Day", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("total_confirmed_inc")),
-            box(title = "Deaths/Day", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("total_death_inc")),
-            box(title = "Recovered/Day", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("total_recovered_inc")),
-            box(title = "Mortality %", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("mortality_overall"))
-          ),  
-          
-          fluidRow(
-            box(title = "Forecasting of Confirmed Cases", background= "light-blue",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("forecaseting_confirmed_ww")),
-            box(title = "Forecasting of Death Cases", background= "light-blue",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("forecaseting_deaths_ww"))
-          ) 
-  ),
-  
-  #-------------------------------------------------------Sub2 Tab1 Starts----------------------------------------------------#
-  
-  tabItem(tabName = "visual1",
-          fluidRow(
-            box(title = "Confirmed/day", background= "purple",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;", plotOutput("worldvisual_confirmed")),
-            box(title = "Deaths/day", background= "purple",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("worldvisual_deaths")),
-            box(title = "Recovered/day", background= "purple",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("worldvisual_recovered"))
-          )
-          
-  ),
-  
-  #-------------------------------------------------------Tab2 Starts----------------------------------------------------#
-  
-  #-------------------------------------------------------Sub1 Tab2 Starts----------------------------------------------------#
-  
-  tabItem(tabName = "top5", 
-          fluidRow(
-            box(title = "Confirmed (Nos)", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5confirmedno")),
-            box(title = "Deaths (Nos)", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5deathsno")),
-            box(title = "Recovered (Nos)", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5recoveredno")),
-            box(title = "Active (Nos)", background= "purple",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5activeno"))
-          ),
-          
-          fluidRow(
-            box(title = "Confirmed (%)", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5confirmedper")),       
-            box(title = "Deaths (%)", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5deathsper")),
-            box(title = "Recovered (%)", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5recoveredper")),
-            box(title = "Active(%)", background= "purple",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5activeper"))   
-          ) 
-  ),
-  
-  
-  #-------------------------------------------------------Sub2 Tab2 Starts----------------------------------------------------#
-  
-  tabItem(tab = "Increaseperday",
-          
-          fluidRow( box(title = "Confirmed/day (Nos)", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5confirmed_day_no")),
-                    box(title = "Deaths/day (Nos)", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5deaths_day_no")),
-                    box(title = "Recovered/day (Nos)", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5recovered_day_no"))
-                    
-          ),
-          
-          fluidRow( box(title = "Confirmed/day (%)", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5confirmed_day_per")),
-                    box(title = "Deaths/day (%)", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5deaths_day_per")),
-                    box(title = "Recovered/day (%)", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5recovered_day_per"))
-          )
-  ),
-  
-  #-------------------------------------------------------Tab3 Starts----------------------------------------------------#
-  
-  #-------------------------------------------------------Sub1 Tab3 Starts----------------------------------------------------#
-  
-  tabItem(tabName = "indianstats", 
-          fluidRow(
-            box(title = "Indian Confirmed", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("indianconfirmed")),
-            box(title = "Indian Deaths", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("indiandeaths")),
-            box(title = "Indian Recovered", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("indianrecovered")),
-            box(title = "Indian Active", background= "purple",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("indianactive"))
-          ),
-          
-          fluidRow(
-            box(title = "Forecasting - Total Confirmed", background= "blue",solidHeader = T, width = 6, collapsible = T,style = "font-size: 150%;",textOutput("india_forecasting_total_confirmed")),
-            box(title = "Forecasting - Total Deaths", background= "red",solidHeader = T, width = 6, collapsible = T,style = "font-size: 150%;",textOutput("india_forecasting_total_death"))
-          ),  
-          
-          fluidRow(
-            box(title = "Confirmed/Day", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("indianconfirmed_inc")),
-            box(title = "Deaths/Day", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("indiandeaths_inc")),
-            box(title = "Recovered/Day", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("indianrecovered_inc")),
-            box(title = "Mortality %", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("indianmortality"))
-          ),
-          
-          fluidRow(
-            box(title = "Forecasting of Confirmed Cases", background= "light-blue",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("forecaseting_confirmed_india")),
-            box(title = "Forecasting of Death Cases", background= "light-blue",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("forecaseting_deaths_india"))
-          )
-  ),
-  
-  
-  #-------------------------------------------------------Sub2 Tab3 Starts----------------------------------------------------#
-  
-  tabItem(tabName = "visual2",
-          fluidRow(
-            box(title = "Confirmed/day", background= "purple",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;", plotOutput("indiavisual_confirmed")),
-            box(title = "Deaths/day", background= "purple",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("indiavisual_deaths")),
-            box(title = "Recovered/day", background= "purple",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("indiavisual_recovered"))
-          )
-  ),
-  
-  #-------------------------------------------------------Tab4 Starts----------------------------------------------------#
-  
-  #-------------------------------------------------------Sub1 Tab4 Starts----------------------------------------------------#
-  
-  
-  tabItem(tabName = "usastats", 
-          fluidRow(
-            box(title = "US Confirmed", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("usconfirmed")),
-            box(title = "US Deaths", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("usdeaths")),
-            box(title = "US Recovered", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("usrecovered")),
-            box(title = "US Active", background= "purple",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("usactive"))
-          ),
-          
-          fluidRow(
-            box(title = "Forecasting - Total Confirmed", background= "blue",solidHeader = T, width = 6, collapsible = T,style = "font-size: 150%;",textOutput("usa_forecasting_total_confirmed")),
-            box(title = "Forecasting - Total Deaths", background= "red",solidHeader = T, width = 6, collapsible = T,style = "font-size: 150%;",textOutput("usa_forecasting_total_death"))
-          ),  
-          
-          fluidRow(
-            box(title = "Confirmed/Day", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("usconfirmed_inc")),
-            box(title = "Deaths/Day", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("usdeaths_inc")),
-            box(title = "Recovered/Day", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("usrecovered_inc")),
-            box(title = "Mortality %", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("usmortality"))
-          ),
-          
-          fluidRow(
-            box(title = "Forecasting of Confirmed Cases", background= "light-blue",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("forecaseting_confirmed_us")),
-            box(title = "Forecasting of Death Cases", background= "light-blue",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("forecaseting_deaths_us"))
-          )
-  ),
-  
-  #-------------------------------------------------------Sub2 Tab4 Starts----------------------------------------------------#  
-  
-  tabItem(tabName = "visual3",
-          fluidRow(
-            box(title = "Confirmed/day", background= "purple",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("usavisual_confirmed")),
-            box(title = "Deaths/day", background= "purple",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("usavisual_deaths")),
-            box(title = "Recovered/day", background= "purple",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("usavisual_recovered"))
-          )
-  ),
-  
-  #-------------------------------------------------------Tab5 Starts----------------------------------------------------#
-  
-  
-  
-  tabItem(tabName = "geo", 
-          fluidRow(
-            box(title = "Confirmed", background= "aqua",solidHeader = T, width = 12,collapsible = T,style = "font-size: 300%;",plotOutput("geo_confirmed"))
-          ),
-          
-          fluidRow(
-            box(title = "Deaths", background= "aqua",solidHeader = T, width = 12,collapsible = T,style = "font-size: 300%;",plotOutput("geo_deaths"))
+    
+    #-------------------------------------------------------Tab1 Starts----------------------------------------------------#
+    
+    
+    #-------------------------------------------------------sub1 Tab1 Starts----------------------------------------------------#
+    
+    tabItem(tabName = "worldstats",
+            fluidRow(
+              box(title = "Total Confirmed", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;", textOutput("total_confirmed")),
+              box(title = "Total Deaths", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("total_death")),
+              box(title = "Total Recovered", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("total_recovered")),
+              box(title = "Total Active", background= "purple",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("total_active"))
+            ),
             
-          ),  
-          
-          fluidRow(
-            box(title = "Recovered", background= "aqua",solidHeader = T, width = 12,collapsible = T,style = "font-size: 300%;",plotOutput("geo_recovered"))
+            fluidRow(
+              box(title = "Forecasting - Total Confirmed", background= "blue",solidHeader = T, width = 6, collapsible = T,style = "font-size: 150%;",textOutput("world_forecasting_total_confirmed")),
+              box(title = "Forecasting - Total Deaths", background= "red",solidHeader = T, width = 6, collapsible = T,style = "font-size: 150%;",textOutput("world_forecasting_total_death"))
+            ),  
             
-          )
+            
+            fluidRow(
+              box(title = "Confirmed/Day", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("total_confirmed_inc")),
+              box(title = "Deaths/Day", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("total_death_inc")),
+              box(title = "Recovered/Day", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("total_recovered_inc")),
+              box(title = "Mortality %", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("mortality_overall"))
+            ),  
+            
+            fluidRow(
+              box(title = "Forecasting of Confirmed Cases", background= "light-blue",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("forecaseting_confirmed_ww")),
+              box(title = "Forecasting of Death Cases", background= "light-blue",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("forecaseting_deaths_ww"))
+            ) 
+    ),
+    
+    #-------------------------------------------------------Sub2 Tab1 Starts----------------------------------------------------#
+    
+    tabItem(tabName = "visual1",
+            fluidRow(
+              box(title = "Confirmed/day", background= "purple",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;", plotOutput("worldvisual_confirmed")),
+              box(title = "Deaths/day", background= "purple",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("worldvisual_deaths")),
+              box(title = "Recovered/day", background= "purple",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("worldvisual_recovered"))
+            )
+            
+    ),
+    
+    #-------------------------------------------------------Tab2 Starts----------------------------------------------------#
+    
+    #-------------------------------------------------------Sub1 Tab2 Starts----------------------------------------------------#
+    
+    tabItem(tabName = "top5", 
+            fluidRow(
+              box(title = "Confirmed (Nos)", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5confirmedno")),
+              box(title = "Deaths (Nos)", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5deathsno")),
+              box(title = "Recovered (Nos)", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5recoveredno")),
+              box(title = "Active (Nos)", background= "purple",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5activeno"))
+            ),
+            
+            fluidRow(
+              box(title = "Confirmed (%)", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5confirmedper")),       
+              box(title = "Deaths (%)", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5deathsper")),
+              box(title = "Recovered (%)", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5recoveredper")),
+              box(title = "Active(%)", background= "purple",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5activeper"))   
+            ) 
+    ),
+    
+    
+    #-------------------------------------------------------Sub2 Tab2 Starts----------------------------------------------------#
+    
+    tabItem(tab = "Increaseperday",
+            
+            fluidRow( box(title = "Confirmed/day (Nos)", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5confirmed_day_no")),
+                      box(title = "Deaths/day (Nos)", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5deaths_day_no")),
+                      box(title = "Recovered/day (Nos)", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5recovered_day_no"))
+                      
+            ),
+            
+            fluidRow( box(title = "Confirmed/day (%)", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5confirmed_day_per")),
+                      box(title = "Deaths/day (%)", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5deaths_day_per")),
+                      box(title = "Recovered/day (%)", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5recovered_day_per"))
+            )
+    ),
+    
+    #-------------------------------------------------------Tab3 Starts----------------------------------------------------#
+    
+    #-------------------------------------------------------Sub1 Tab3 Starts----------------------------------------------------#
+    
+    tabItem(tabName = "indianstats", 
+            fluidRow(
+              box(title = "Indian Confirmed", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("indianconfirmed")),
+              box(title = "Indian Deaths", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("indiandeaths")),
+              box(title = "Indian Recovered", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("indianrecovered")),
+              box(title = "Indian Active", background= "purple",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("indianactive"))
+            ),
+            
+            fluidRow(
+              box(title = "Forecasting - Total Confirmed", background= "blue",solidHeader = T, width = 6, collapsible = T,style = "font-size: 150%;",textOutput("india_forecasting_total_confirmed")),
+              box(title = "Forecasting - Total Deaths", background= "red",solidHeader = T, width = 6, collapsible = T,style = "font-size: 150%;",textOutput("india_forecasting_total_death"))
+            ),  
+            
+            fluidRow(
+              box(title = "Confirmed/Day", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("indianconfirmed_inc")),
+              box(title = "Deaths/Day", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("indiandeaths_inc")),
+              box(title = "Recovered/Day", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("indianrecovered_inc")),
+              box(title = "Mortality %", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("indianmortality"))
+            ),
+            
+            fluidRow(
+              box(title = "Forecasting of Confirmed Cases", background= "light-blue",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("forecaseting_confirmed_india")),
+              box(title = "Forecasting of Death Cases", background= "light-blue",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("forecaseting_deaths_india"))
+            )
+    ),
+    
+    
+    #-------------------------------------------------------Sub2 Tab3 Starts----------------------------------------------------#
+    
+    tabItem(tabName = "visual2",
+            fluidRow(
+              box(title = "Confirmed/day", background= "purple",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;", plotOutput("indiavisual_confirmed")),
+              box(title = "Deaths/day", background= "purple",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("indiavisual_deaths")),
+              box(title = "Recovered/day", background= "purple",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("indiavisual_recovered"))
+            )
+    ),
+    
+    #-------------------------------------------------------Tab4 Starts----------------------------------------------------#
+    
+    #-------------------------------------------------------Sub1 Tab4 Starts----------------------------------------------------#
+    
+    
+    tabItem(tabName = "usastats", 
+            fluidRow(
+              box(title = "US Confirmed", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("usconfirmed")),
+              box(title = "US Deaths", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("usdeaths")),
+              box(title = "US Recovered", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("usrecovered")),
+              box(title = "US Active", background= "purple",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("usactive"))
+            ),
+            
+            fluidRow(
+              box(title = "Forecasting - Total Confirmed", background= "blue",solidHeader = T, width = 6, collapsible = T,style = "font-size: 150%;",textOutput("usa_forecasting_total_confirmed")),
+              box(title = "Forecasting - Total Deaths", background= "red",solidHeader = T, width = 6, collapsible = T,style = "font-size: 150%;",textOutput("usa_forecasting_total_death"))
+            ),  
+            
+            fluidRow(
+              box(title = "Confirmed/Day", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("usconfirmed_inc")),
+              box(title = "Deaths/Day", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("usdeaths_inc")),
+              box(title = "Recovered/Day", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("usrecovered_inc")),
+              box(title = "Mortality %", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("usmortality"))
+            ),
+            
+            fluidRow(
+              box(title = "Forecasting of Confirmed Cases", background= "light-blue",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("forecaseting_confirmed_us")),
+              box(title = "Forecasting of Death Cases", background= "light-blue",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("forecaseting_deaths_us"))
+            )
+    ),
+    
+    #-------------------------------------------------------Sub2 Tab4 Starts----------------------------------------------------#  
+    
+    tabItem(tabName = "visual3",
+            fluidRow(
+              box(title = "Confirmed/day", background= "purple",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("usavisual_confirmed")),
+              box(title = "Deaths/day", background= "purple",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("usavisual_deaths")),
+              box(title = "Recovered/day", background= "purple",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("usavisual_recovered"))
+            )
+    ),
+    
+    #-------------------------------------------------------Tab5 Starts----------------------------------------------------#
+    
+    
+    
+    tabItem(tabName = "geo", 
+            fluidRow(
+              box(title = "Confirmed", background= "aqua",solidHeader = T, width = 12,collapsible = T,style = "font-size: 300%;",plotOutput("geo_confirmed"))
+            ),
+            
+            fluidRow(
+              box(title = "Deaths", background= "aqua",solidHeader = T, width = 12,collapsible = T,style = "font-size: 300%;",plotOutput("geo_deaths"))
+              
+            ),  
+            
+            fluidRow(
+              box(title = "Recovered", background= "aqua",solidHeader = T, width = 12,collapsible = T,style = "font-size: 300%;",plotOutput("geo_recovered"))
+              
+            )
+    )
+    #-------------------------------------------------------End of Tabs----------------------------------------------------#
+    
   )
-  #-------------------------------------------------------End of Tabs----------------------------------------------------#
-  
-)
-)
+                   )
 
 
-ui = dashboardPage(skin = "blue",
+ui = dashboardPage(skin = "red",
                    dashboardHeader(title = span("Coronavirus Dashboard",style = "font-family: Arial; font-weight: bold;font-size: 25px"),titleWidth = 400),
                    sidebar,
                    body, headerPanel("",windowTitle = "Coronavirus Dashboard")
-                   )
+)
 
 # Preview the UI in the console
 server = function(input, output) {
@@ -1109,50 +1109,3 @@ shinyApp(ui = ui, server = server)
 
 
 
-library(shiny)
-library(shinydashboard) 
-ui <- dashboardPage(
-  dashboardHeader(
-    title = "demo"
-  ), 
-  dashboardSidebar(), 
-  dashboardBody(
-    tags$head(tags$style(HTML(
-      '.myClass { 
-      font-size: 20px;
-      line-height: 50px;
-      text-align: left;
-      font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
-      padding: 0 15px;
-      overflow: hidden;
-      color: white;
-      }
-      '))),
-    tags$script(HTML('
-                     $(document).ready(function() {
-                     $("header").find("nav").append(\'<span class="myClass"> Designed by Karan Sehgal </span>\');
-                     })
-                     '))
-                     )
-    ) 
-server <- function(input, output) { } 
-shinyApp(ui, server)
-
-
-
-library(shiny)
-library(shinydashboard)
-
-header <- dashboardHeader()
-anchor <- tags$a(href='http://www.example.com',
-                 tags$img(src='logo.png', height='60', width='50'),
-                 'project name')
-
-header$children[[2]]$children <- tags$div(
-  tags$head(tags$style(HTML(".name { background-color: black }"))),
-  anchor,
-  class = 'name')
-
-ui <- dashboardPage(header, dashboardSidebar(), dashboardBody())
-
-shinyApp(ui, server = function(input, output, session) {})

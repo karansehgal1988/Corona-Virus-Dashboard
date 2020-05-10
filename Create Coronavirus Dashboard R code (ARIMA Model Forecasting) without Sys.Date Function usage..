@@ -1,0 +1,1105 @@
+# -------------------------------------------------- Shiny Dashboard -------------------------------------------#
+options(scipen = 999)
+library(shiny)
+library(shinydashboard)
+library(lubridate)
+library(scales)
+library(forecast)
+library(tseries)
+library(dplyr)
+library(ggplot2)
+library(ggthemes)
+library(rnaturalearth)
+library(rnaturalearthdata)
+library(rgeos)
+library(sf)
+
+sidebar = dashboardSidebar(width = 200,
+                           sidebarMenu(
+                             menuItem("Global View", icon = icon("fas fa-globe"),menuSubItem("Statistics",tabName = "worldstats",icon = icon("fas fa-chart-bar")),menuSubItem("Incs/Day Graph",tabName = "visual1", icon = icon("fas fa-chart-line"))),
+                             menuItem("Top5 Countries",icon = icon("table"),menuSubItem("Top Countires",tabName = "top5",icon = icon("table")),menuSubItem("Top5 Incs/day",tabName = "Increaseperday", icon = icon("list-alt"))),
+                             menuItem("Indian View", icon = icon("fas fa-rupee-sign"),menuSubItem("Statistics",tabName = "indianstats",icon = icon("fas fa-chart-bar")),menuSubItem("Incs/Day Graph",tabName = "visual2", icon = icon("fas fa-chart-line"))),
+                             menuItem("USA View", tabName = "usastats", icon = icon("fas fa-dollar-sign"),menuSubItem("Statistics",tabName = "usastats",icon = icon("fas fa-chart-bar")),menuSubItem("Incs/Day Graph",tabName = "visual3", icon = icon("fas fa-chart-line"))),
+                             menuItem("Geo Spatial View", tabName = "geo", icon = icon("fas fa-globe-asia"),badgeLabel = "New", badgeColor = "red"),
+                             actionButton("show","DATA UPDATE INFO",icon =icon("refresh"))
+                           )
+)
+
+
+body = dashboardBody(tags$head(tags$style(HTML(
+  '.myClass { 
+  font-size: 15px;
+  line-height: 50px;
+  text-align: center;
+  font-family: Arial;
+  padding: 20px;
+  overflow: hidden;
+  color: white;
+  }
+  '))),
+  tags$script(HTML('
+                   $(document).ready(function() {
+                   $("header").find("nav").append(\'<span class="myClass"> Designed by Karan Sehgal </span>\');
+                   })
+                   ')),
+  
+  tabItems(
+    
+    #-------------------------------------------------------Tab1 Starts----------------------------------------------------#
+    
+    
+    #-------------------------------------------------------sub1 Tab1 Starts----------------------------------------------------#
+    
+    tabItem(tabName = "worldstats",
+            fluidRow(
+              box(title = "Total Confirmed", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;", textOutput("total_confirmed")),
+              box(title = "Total Deaths", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("total_death")),
+              box(title = "Total Recovered", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("total_recovered")),
+              box(title = "Total Active", background= "purple",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("total_active"))
+            ),
+            
+            fluidRow(
+              box(title = "Forecasting - Total Confirmed", background= "blue",solidHeader = T, width = 6, collapsible = T,style = "font-size: 150%;",textOutput("world_forecasting_total_confirmed")),
+              box(title = "Forecasting - Total Deaths", background= "red",solidHeader = T, width = 6, collapsible = T,style = "font-size: 150%;",textOutput("world_forecasting_total_death"))
+            ),  
+            
+            
+            fluidRow(
+              box(title = "Confirmed/Day", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("total_confirmed_inc")),
+              box(title = "Deaths/Day", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("total_death_inc")),
+              box(title = "Recovered/Day", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("total_recovered_inc")),
+              box(title = "Mortality %", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("mortality_overall"))
+            ),  
+            
+            fluidRow(
+              box(title = "Forecasting of Confirmed Cases", background= "light-blue",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("forecaseting_confirmed_ww")),
+              box(title = "Forecasting of Death Cases", background= "light-blue",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("forecaseting_deaths_ww"))
+            ) 
+    ),
+    
+    #-------------------------------------------------------Sub2 Tab1 Starts----------------------------------------------------#
+    
+    tabItem(tabName = "visual1",
+            fluidRow(
+              box(title = "Confirmed/day", background= "purple",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;", plotOutput("worldvisual_confirmed")),
+              box(title = "Deaths/day", background= "purple",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("worldvisual_deaths")),
+              box(title = "Recovered/day", background= "purple",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("worldvisual_recovered"))
+            )
+            
+    ),
+    
+    #-------------------------------------------------------Tab2 Starts----------------------------------------------------#
+    
+    #-------------------------------------------------------Sub1 Tab2 Starts----------------------------------------------------#
+    
+    tabItem(tabName = "top5", 
+            fluidRow(
+              box(title = "Confirmed (Nos)", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5confirmedno")),
+              box(title = "Deaths (Nos)", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5deathsno")),
+              box(title = "Recovered (Nos)", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5recoveredno")),
+              box(title = "Active (Nos)", background= "purple",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5activeno"))
+            ),
+            
+            fluidRow(
+              box(title = "Confirmed (%)", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5confirmedper")),       
+              box(title = "Deaths (%)", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5deathsper")),
+              box(title = "Recovered (%)", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5recoveredper")),
+              box(title = "Active(%)", background= "purple",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5activeper"))   
+            ) 
+    ),
+    
+    
+    #-------------------------------------------------------Sub2 Tab2 Starts----------------------------------------------------#
+    
+    tabItem(tab = "Increaseperday",
+            
+            fluidRow( box(title = "Confirmed/day (Nos)", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5confirmed_day_no")),
+                      box(title = "Deaths/day (Nos)", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5deaths_day_no")),
+                      box(title = "Recovered/day (Nos)", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5recovered_day_no"))
+                      
+            ),
+            
+            fluidRow( box(title = "Confirmed/day (%)", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5confirmed_day_per")),
+                      box(title = "Deaths/day (%)", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5deaths_day_per")),
+                      box(title = "Recovered/day (%)", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",tableOutput("top5recovered_day_per"))
+            )
+    ),
+    
+    #-------------------------------------------------------Tab3 Starts----------------------------------------------------#
+    
+    #-------------------------------------------------------Sub1 Tab3 Starts----------------------------------------------------#
+    
+    tabItem(tabName = "indianstats", 
+            fluidRow(
+              box(title = "Indian Confirmed", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("indianconfirmed")),
+              box(title = "Indian Deaths", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("indiandeaths")),
+              box(title = "Indian Recovered", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("indianrecovered")),
+              box(title = "Indian Active", background= "purple",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("indianactive"))
+            ),
+            
+            fluidRow(
+              box(title = "Forecasting - Total Confirmed", background= "blue",solidHeader = T, width = 6, collapsible = T,style = "font-size: 150%;",textOutput("india_forecasting_total_confirmed")),
+              box(title = "Forecasting - Total Deaths", background= "red",solidHeader = T, width = 6, collapsible = T,style = "font-size: 150%;",textOutput("india_forecasting_total_death"))
+            ),  
+            
+            fluidRow(
+              box(title = "Confirmed/Day", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("indianconfirmed_inc")),
+              box(title = "Deaths/Day", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("indiandeaths_inc")),
+              box(title = "Recovered/Day", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("indianrecovered_inc")),
+              box(title = "Mortality %", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("indianmortality"))
+            ),
+            
+            fluidRow(
+              box(title = "Forecasting of Confirmed Cases", background= "light-blue",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("forecaseting_confirmed_india")),
+              box(title = "Forecasting of Death Cases", background= "light-blue",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("forecaseting_deaths_india"))
+            )
+    ),
+    
+    
+    #-------------------------------------------------------Sub2 Tab3 Starts----------------------------------------------------#
+    
+    tabItem(tabName = "visual2",
+            fluidRow(
+              box(title = "Confirmed/day", background= "purple",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;", plotOutput("indiavisual_confirmed")),
+              box(title = "Deaths/day", background= "purple",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("indiavisual_deaths")),
+              box(title = "Recovered/day", background= "purple",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("indiavisual_recovered"))
+            )
+    ),
+    
+    #-------------------------------------------------------Tab4 Starts----------------------------------------------------#
+    
+    #-------------------------------------------------------Sub1 Tab4 Starts----------------------------------------------------#
+    
+    
+    tabItem(tabName = "usastats", 
+            fluidRow(
+              box(title = "US Confirmed", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("usconfirmed")),
+              box(title = "US Deaths", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("usdeaths")),
+              box(title = "US Recovered", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("usrecovered")),
+              box(title = "US Active", background= "purple",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("usactive"))
+            ),
+            
+            fluidRow(
+              box(title = "Forecasting - Total Confirmed", background= "blue",solidHeader = T, width = 6, collapsible = T,style = "font-size: 150%;",textOutput("usa_forecasting_total_confirmed")),
+              box(title = "Forecasting - Total Deaths", background= "red",solidHeader = T, width = 6, collapsible = T,style = "font-size: 150%;",textOutput("usa_forecasting_total_death"))
+            ),  
+            
+            fluidRow(
+              box(title = "Confirmed/Day", background= "blue",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("usconfirmed_inc")),
+              box(title = "Deaths/Day", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("usdeaths_inc")),
+              box(title = "Recovered/Day", background= "green",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("usrecovered_inc")),
+              box(title = "Mortality %", background= "red",solidHeader = T, width = 3, collapsible = T,style = "font-size: 150%;",textOutput("usmortality"))
+            ),
+            
+            fluidRow(
+              box(title = "Forecasting of Confirmed Cases", background= "light-blue",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("forecaseting_confirmed_us")),
+              box(title = "Forecasting of Death Cases", background= "light-blue",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("forecaseting_deaths_us"))
+            )
+    ),
+    
+    #-------------------------------------------------------Sub2 Tab4 Starts----------------------------------------------------#  
+    
+    tabItem(tabName = "visual3",
+            fluidRow(
+              box(title = "Confirmed/day", background= "purple",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("usavisual_confirmed")),
+              box(title = "Deaths/day", background= "purple",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("usavisual_deaths")),
+              box(title = "Recovered/day", background= "purple",solidHeader = T, width = 6, collapsible = T,style = "font-size: 300%;",plotOutput("usavisual_recovered"))
+            )
+    ),
+    
+    #-------------------------------------------------------Tab5 Starts----------------------------------------------------#
+    
+    
+    
+    tabItem(tabName = "geo", 
+            
+            fluidRow(
+              box(title = "Total Countries Count", background= "red",solidHeader = T, width = 3,collapsible = T,style = "font-size: 200%;",textOutput("total_countries"))
+              
+            ),
+            
+            fluidRow(
+              box(title = "Confirmed", background= "aqua",solidHeader = T, width = 12,collapsible = T,style = "font-size: 300%;",plotOutput("geo_confirmed"))
+            ),
+            
+            fluidRow(
+              box(title = "Deaths", background= "aqua",solidHeader = T, width = 12,collapsible = T,style = "font-size: 300%;",plotOutput("geo_deaths"))
+              
+            ),  
+            
+            fluidRow(
+              box(title = "Recovered", background= "aqua",solidHeader = T, width = 12,collapsible = T,style = "font-size: 300%;",plotOutput("geo_recovered"))
+              
+              
+              
+            )
+    )
+    #-------------------------------------------------------End of Tabs----------------------------------------------------#
+    
+  )
+  )
+
+
+ui = dashboardPage(skin = "blue",
+                   dashboardHeader(title = span("Coronavirus Dashboard",style = "font-family: Arial; font-weight: bold;font-size: 25px"),titleWidth = 400),
+                   sidebar,
+                   body, headerPanel("",windowTitle = "Coronavirus Dashboard")
+)
+
+# Preview the UI in the console
+server = function(input, output) {
+  options(scipen = 999)
+  library(lubridate)
+  library(scales)
+  library(forecast)
+  library(tseries)
+  library(dplyr)
+  library(ggplot2)
+  library(ggthemes)
+  library(rnaturalearth)
+  library(rnaturalearthdata)
+  library(rgeos)
+  library(sf)
+  
+  #---------------------------------------------------------Calculations--------------------------------------------------------------#
+  
+  
+  url = "https://raw.githubusercontent.com/datasets/covid-19/master/data/countries-aggregated.csv"
+  
+  data  = read.csv(url)
+  
+  data$Date = as_date(data$Date)
+  
+  data = arrange(data,desc(Date))
+  
+  data = data%>%group_by(Date,Country)%>%summarise(confirmed = sum(Confirmed),deaths=sum(Deaths),recovered = sum(Recovered))%>%arrange(desc(Date))%>%data.frame()
+  
+  date = data[1,"Date"]
+  
+  #----------------------------------- Automatic Data Selection Code for Data Selection--------------------#
+  
+  
+  data2 = data.frame(filter(data,Date==date))
+  
+  data3 = data.frame(filter(data,Date==(date-1)))
+  
+  data2$active = data2$confirmed - (data2$recovered+data2$deaths)
+  data3$active = data3$confirmed - (data3$recovered+data3$deaths)
+  
+  data_merged = inner_join(data2,data3,by= "Country")
+  
+  # -------------------------------------------Repalcing NA with 0---------------------------------------------#
+  
+  data_merged$confirmed.x[is.na(data_merged$confirmed.x)] = 0
+  data_merged$deaths.x[is.na(data_merged$deaths.x)] = 0
+  data_merged$recovered.x[is.na(data_merged$recovered.x)] = 0
+  data_merged$confirmed.y[is.na(data_merged$confirmed.y)] = 0
+  data_merged$deaths.y[is.na(data_merged$deaths.y)] = 0
+  data_merged$recovered.y[is.na(data_merged$recovered.y)] = 0
+  
+  data_merged$Date.y = NULL
+  
+  
+  #------------------ Difference from current date to Previous date ----------#
+  
+  data_merged$confirmed_delta = data_merged$confirmed.x - data_merged$confirmed.y
+  
+  data_merged$deaths_delta =   data_merged$deaths.x - data_merged$deaths.y
+  
+  data_merged$recovered_delta =   data_merged$recovered.x - data_merged$recovered.y
+  
+  data_merged$active_delta =   data_merged$active.x - data_merged$active.y
+  
+  # ------------ Repalcing NA with 0 for active --------------------#
+  
+  data_merged$active.x[is.na(data_merged$active.x)] = 0
+  data_merged$active.y[is.na(data_merged$active.y)] = 0
+  #-------------------- Renaming of the Variables------------------#
+  
+  data_merged = rename(data_merged, Confirmed = confirmed.x, Deaths = deaths.x,Recovered = recovered.x, Active = active.x,
+                       Confirmed_Incs = confirmed_delta, Deaths_Incs = deaths_delta,
+                       Recovered_Incs = recovered_delta, Active_Incs = active_delta)
+  
+  #-----------------------------------------------------Confirmed Cases Starts---------------------------------#
+  
+  
+  #------------ Total Confimed Cases-----------#
+  
+  
+  total_confirmed = data_merged$Confirmed%>%sum()
+  
+  total_confirmed1 = total_confirmed%>%comma()  
+  
+  
+  #------------ Top 5 Countries Confirmed Cases No.------------#
+  
+  data_merged_conf_no = data_merged%>%arrange(desc(Confirmed))%>%select(Country,Confirmed)%>%head(5)
+  data_merged_conf_no$Confirmed = comma(data_merged_conf_no$Confirmed)
+  data_merged_conf_no  
+  
+  
+  #------------ Top 5 Countries Confirmed Cases percentage.------------#
+  
+  data_merged_conf_pr = data_merged%>%select(Country,Confirmed)%>%mutate(Percentage = Confirmed/sum(Confirmed)*100)%>%arrange(desc(Percentage))%>%select(-c(Confirmed))%>%head(5)
+  
+  data_merged_conf_pr$Percentage = round(data_merged_conf_pr$Percentage,digits = 2)
+  
+  data_merged_conf_pr$Percentage = sprintf("%3g%%", data_merged_conf_pr$Percentage)
+  
+  data_merged_conf_pr
+  
+  
+  #------------------- Total Confirmed delta no.----------------#
+  
+  data_merged_conf_delta_total = data_merged$Confirmed_Incs%>%sum()%>%comma()
+  
+  data_merged_conf_delta_total
+  
+  #------------------- Top 5 countries Confirmed delta no.----------------#
+  
+  data_merged_conf_delta_no = data_merged%>%arrange(desc(Confirmed_Incs))%>%select(Country,Confirmed_Incs)%>%head(5)
+  data_merged_conf_delta_no$Confirmed_Incs = comma(data_merged_conf_delta_no$Confirmed_Incs)
+  data_merged_conf_delta_no 
+  
+  
+  #------------------- Top 5 countries Confirmed delta percentage.----------------#
+  
+  data_merged_conf_inc_per= data_merged%>%select(Country,Confirmed_Incs)%>%mutate(Percentage = Confirmed_Incs/sum(Confirmed_Incs)*100)%>%arrange(desc(Percentage))%>%select(-c(Confirmed_Incs))%>%head(5)
+  
+  data_merged_conf_inc_per$Percentage = round(data_merged_conf_inc_per$Percentage,digits = 2)
+  
+  data_merged_conf_inc_per$Percentage = sprintf("%3g%%", data_merged_conf_inc_per$Percentage)
+  
+  data_merged_conf_inc_per
+  
+  
+  #-------------------------------------------------Confirmed Cases Ends--------------------------------#
+  
+  
+  #------------------------------------------------- Deaths Cases Starts----------------------------------------#
+  
+  
+  #--------- Total Deaths Cases---------------#
+  
+  total_death = data_merged$Deaths%>%sum()
+  
+  total_death1 = total_death%>%comma()
+  
+  #------------ Top 5 Countries Deaths Cases No.------------#
+  
+  data_merged_deaths_no = data_merged%>%arrange(desc(Deaths))%>%select(Country,Deaths)%>%head(5)
+  data_merged_deaths_no$Deaths = comma(data_merged_deaths_no$Deaths)
+  data_merged_deaths_no  
+  
+  #------------ Top 5 Countries Deaths Cases Percentage.------------#
+  
+  data_merged_death_pr = data_merged%>%select(Country,Deaths)%>%mutate(Percentage = Deaths/sum(Deaths)*100)%>%arrange(desc(Percentage))%>%select(-c(Deaths))%>%head(5)
+  
+  data_merged_death_pr$Percentage = round(data_merged_death_pr$Percentage,digits = 2)
+  
+  data_merged_death_pr$Percentage = sprintf("%3g%%", data_merged_death_pr$Percentage)
+  
+  data_merged_death_pr
+  
+  
+  #------------------- Total deaths delta----------------#
+  
+  data_merged_deaths_delta_total = data_merged$Deaths_Incs%>%sum()%>%comma()
+  
+  data_merged_deaths_delta_total
+  
+  
+  #------------------- Top 5 countries deaths delta no.----------------#
+  
+  data_merged_deaths_delta_no = data_merged%>%arrange(desc(Deaths_Incs))%>%select(Country,Deaths_Incs)%>%head(5)
+  data_merged_deaths_delta_no$Deaths_Incs = comma(data_merged_deaths_delta_no$Deaths_Incs)
+  data_merged_deaths_delta_no 
+  
+  #------------------- Top 5 countries deaths delta percentage.----------------#
+  
+  data_merged_deaths_inc_per= data_merged%>%select(Country,Deaths_Incs)%>%mutate(Percentage = Deaths_Incs/sum(Deaths_Incs)*100)%>%arrange(desc(Percentage))%>%select(-c(Deaths_Incs))%>%head(5)
+  
+  data_merged_deaths_inc_per$Percentage = round(data_merged_deaths_inc_per$Percentage,digits = 2)
+  
+  data_merged_deaths_inc_per$Percentage = sprintf("%3g%%", data_merged_deaths_inc_per$Percentage)
+  
+  data_merged_deaths_inc_per
+  
+  #---------------------------------------------------------Deaths Cases Ends----------------------------------#
+  
+  
+  #-------------------------------------Recovered Cases Starts-----------------------------#
+  
+  #--------- Total Recovered Cases---------------#
+  
+  total_recovered = data_merged$Recovered%>%sum()
+  
+  total_recovered1 = total_recovered%>%comma()
+  
+  #------------ Top 5 Countries Recovered Cases No.------------#
+  
+  data_merged_recovered_no = data_merged%>%arrange(desc(Recovered))%>%select(Country,Recovered)%>%head(5)
+  data_merged_recovered_no$Recovered = comma(data_merged_recovered_no$Recovered)
+  data_merged_recovered_no
+  
+  #------------ Top 5 Countries Recovered Cases Percentage ------------#
+  
+  data_merged_recovered_pr = data_merged%>%select(Country,Recovered)%>%mutate(Percentage = Recovered/sum(Recovered)*100)%>%arrange(desc(Percentage))%>%select(-c(Recovered))%>%head(5)
+  
+  data_merged_recovered_pr$Percentage = round(data_merged_recovered_pr$Percentage,digits = 2)
+  
+  data_merged_recovered_pr$Percentage = sprintf("%3g%%", data_merged_recovered_pr$Percentage)
+  
+  data_merged_recovered_pr
+  
+  #------------------- Total Recovered delta----------------#
+  
+  data_merged_recovered_delta_total = sum(data_merged$Recovered_Incs)%>%comma()
+  
+  data_merged_recovered_delta_total
+  
+  #------------------- Top 5 countries Recovered delta no.----------------#
+  
+  data_merged_recovered_delta_no = data_merged%>%arrange(desc(Recovered_Incs))%>%select(Country,Recovered_Incs)%>%head(5)
+  data_merged_recovered_delta_no$Recovered_Incs = comma(data_merged_recovered_delta_no$Recovered_Incs)
+  data_merged_recovered_delta_no
+  
+  #------------------- Top 5 countries Recovered delta percentage.----------------#
+  
+  data_merged_recovered_inc_per= data_merged%>%select(Country,Recovered_Incs)%>%mutate(Percentage = Recovered_Incs/sum(Recovered_Incs)*100)%>%arrange(desc(Percentage))%>%select(-c(Recovered_Incs))%>%head(5)
+  
+  data_merged_recovered_inc_per$Percentage = round(data_merged_recovered_inc_per$Percentage,digits = 2)
+  
+  data_merged_recovered_inc_per$Percentage = sprintf("%3g%%", data_merged_recovered_inc_per$Percentage)
+  
+  data_merged_recovered_inc_per
+  
+  #--------------------------------------- Recovered Cases Ends--------------------------#
+  
+  
+  #--------------------------------------- Active Cases Cases Ends--------------------------------#
+  
+  total_active = data_merged$Active%>%sum()
+  
+  total_active1 = total_active%>%comma()
+  
+  #------------ Top 5 Countries Active Cases No.------------#
+  
+  data_merged_active_no = data_merged%>%arrange(desc(Active))%>%select(Country,Active)%>%head(5)
+  data_merged_active_no$Active = comma(data_merged_active_no$Active)
+  data_merged_active_no
+  
+  #------------ Top 5 Countries Active Cases Percentage.------------#
+  
+  
+  
+  data_merged_active_pr = data_merged%>%select(Country,Active)%>%mutate(Percentage = Active/sum(Active)*100)%>%arrange(desc(Percentage))%>%select(-c(Active))%>%head(5)
+  
+  data_merged_active_pr$Percentage = round(data_merged_active_pr$Percentage,digits = 2)
+  
+  data_merged_active_pr$Percentage = sprintf("%3g%%", data_merged_active_pr$Percentage)
+  
+  data_merged_active_pr
+  #-------------------------------------Mortality %-----------------------------#
+  
+  #Overall %
+  
+  Mortality_Overall = round(sum(data_merged$Deaths)/(sum(data_merged$Confirmed))*100,digits = 2)
+  
+  Mortality_Overall = sprintf("%3g%%",Mortality_Overall)
+  
+  Mortality_Overall 
+  
+  
+  #------------------------------------- World per/day visualization-------------------------------#
+  
+  data31 =  data%>%group_by(Date)%>%summarise(confirmed = sum(confirmed),deaths=sum(deaths),recovered = sum(recovered))%>%arrange(desc(Date))%>%data.frame()
+  
+  #For Confirmed
+  
+  data32 = data31%>%select(c("Date","confirmed"))
+  data32 = mutate(data32[-1,],Variation = diff(data32$confirmed)*(-1))
+  data32$confirmed = NULL
+  
+  plot31 = ggplot(data32) +
+    aes(x = Date, y = Variation, colour = Variation) +
+    geom_line(size = 1L) +
+    scale_color_gradient() +
+    labs(x = "Date", y = "Confirmed Increase", title = "Confirmed Increase/day") +
+    ggthemes::theme_gdocs()+stat_smooth(method = "auto")
+  
+  # For Deaths
+  
+  data33 = data31%>%select(c("Date","deaths"))
+  data33 = mutate(data33[-1,],Variation = diff(data33$deaths)*(-1))
+  data33$deaths = NULL 
+  
+  
+  plot32 = ggplot(data33) +
+    aes(x = Date, y = Variation, colour = Variation) +
+    geom_line(size = 1L) +
+    scale_color_gradient() +
+    labs(x = "Date", y = "Deaths Increase", title = "Deaths Increase/day") +
+    ggthemes::theme_gdocs()+stat_smooth(method = "auto")
+  
+  #For recovered
+  
+  data34 = data31%>%select(c("Date","recovered"))
+  data34 = mutate(data34[-1,],Variation = diff(data34$recovered)*(-1))
+  data34$recovered = NULL
+  
+  plot33 = ggplot(data34) +
+    aes(x = Date, y = Variation, colour = Variation) +
+    geom_line(size = 1L) +
+    scale_color_gradient() +
+    labs(x = "Date", y = "Recovered Increase", title = "Recovered Increase/day") +
+    ggthemes::theme_gdocs()+stat_smooth(method = "auto")
+  
+  #----------------------------------------- India Analytics-----------------------------#
+  
+  
+  data4 = filter(data2, Country=="India")
+  
+  data5 = filter(data3, Country=="India")
+  
+  data20 = filter(data, Country=="India")
+  
+  #---------------------- Confirmed Cases--------------------------------#
+  
+  Indian_Confirmed = data4$confirmed%>%sum()
+  Indian_Confirmed1 = Indian_Confirmed%>%comma()
+  
+  #---------------------- Deaths Cases--------------------------------#
+  
+  Indian_Deaths = data4$deaths%>%sum()
+  Indian_Deaths1 = Indian_Deaths%>%comma()
+  #----------------------- Recovered Cases-------------------------#
+  
+  Indian_Recovered = data4$recovered%>%sum()
+  Indian_Recovered1 = Indian_Recovered%>%comma()
+  #----------------------- Active Cases----------------------------#
+  
+  Indian_Active = data4$active%>%sum()
+  Indian_Active1 = Indian_Active%>%comma()
+  #-------------------- Increase per day -----------------------------#
+  
+  Indian_Confirmed_Increase = (data4$confirmed - data5$confirmed)%>%comma()
+  
+  Indian_Deaths_Increase = (data4$deaths - data5$deaths)%>%comma()
+  
+  Indian_Recovered_Increase = (data4$recovered - data5$recovered)%>%comma()
+  
+  
+  #------------------------------- Mortality % ------------------------#
+  
+  Indian_Mortality = round((data4$deaths/data4$confirmed)*100,digits = 2)
+  Indian_Mortality = sprintf("%3g%%", Indian_Mortality)
+  
+  
+  #------------------------------- Indian Increase Per/Day Visualization--------------------------------------#
+  
+  # For Confirmed 
+  data21 = data20%>%select(c("Date","confirmed"))
+  data21 = mutate(data21[-1,],Variation = diff(data21$confirmed)*(-1))
+  data21$confirmed = NULL 
+  
+  plot21 = ggplot(data21) +
+    aes(x = Date, y = Variation, colour = Variation) +
+    geom_line(size = 1L) +
+    scale_color_gradient() +
+    labs(x = "Date", y = "Confirmed Increase", title = "Confirmed Increase/day") +
+    ggthemes::theme_gdocs()+stat_smooth(method = "auto")
+  
+  #For Deaths
+  data22 = data20%>%select(c("Date","deaths"))
+  data22 = mutate(data22[-1,],Variation = diff(data22$deaths)*(-1))
+  data22$deaths = NULL 
+  
+  
+  plot22 = ggplot(data22) +
+    aes(x = Date, y = Variation, colour = Variation) +
+    geom_line(size = 1L) +
+    scale_color_gradient() +
+    labs(x = "Date", y = "Deaths Increase", title = "Deaths Increase/day") +
+    ggthemes::theme_gdocs()+stat_smooth(method = "auto")
+  
+  #For Recovered
+  data23 = data20%>%select(c("Date","recovered"))
+  data23 = mutate(data23[-1,],Variation = diff(data23$recovered)*(-1))
+  data23$recovered = NULL 
+  
+  
+  plot23 = ggplot(data23) +
+    aes(x = Date, y = Variation, colour = Variation) +
+    geom_line(size = 1L) +
+    scale_color_gradient() +
+    labs(x = "Date", y = "Recovered Increase", title = "Recovered Increase/day") +
+    ggthemes::theme_gdocs()+stat_smooth(method = "auto")
+  
+  #-----------------------------------------USA Analytics-----------------------------#
+  
+  data10 = filter(data2, Country=="US")
+  
+  data11 = filter(data3, Country=="US")
+  
+  data30 = filter(data, Country=="US")
+  
+  #---------------------- Confirmed Cases--------------------------------#
+  
+  US_Confirmed = data10$confirmed%>%sum()
+  US_Confirmed1 = US_Confirmed%>%comma()
+  #---------------------- Deaths Cases--------------------------------#
+  
+  US_Deaths = data10$deaths%>%sum()
+  US_Deaths1 = US_Deaths%>%comma()
+  #----------------------- Recovered Cases-------------------------#
+  
+  US_Recovered = data10$recovered%>%sum()
+  US_Recovered1 = US_Recovered%>%comma()
+  #----------------------- Active Cases----------------------------#
+  
+  Us_Active = data10$active%>%sum()
+  Us_Active1 = Us_Active%>%comma()
+  #--------------------------Increase per day----------------------------------#
+  
+  US_Confirmed_Increase = (data10$confirmed - data11$confirmed)%>%comma()
+  
+  US_Deaths_Increase = (data10$deaths - data11$deaths)%>%comma()
+  
+  US_Recovered_Increase = (data10$recovered - data11$recovered)%>%comma()
+  
+  #------------------------------- Mortality % ------------------------#
+  
+  US_Mortality = round((data10$deaths/data10$confirmed)*100,digits = 2)
+  US_Mortality = sprintf("%3g%%", US_Mortality)
+  
+  #---------------------------------USA Increase Per/Day Visualization-------------------------------------------#
+  ### Confirmed Cases
+  data23 = data30%>%select(c("Date","confirmed"))
+  data23 = mutate(data23[-1,],Variation = diff(data23$confirmed)*(-1))
+  data23$confirmed = NULL 
+  
+  plot24 = ggplot(data23) +
+    aes(x = Date, y = Variation, colour = Variation) +
+    geom_line(size = 1L) +
+    scale_color_gradient() +
+    labs(x = "Date", y = "Confirmed Increase", title = "Confirmed Increase/day") +
+    ggthemes::theme_gdocs()+stat_smooth(method = "auto")
+  
+  
+  ### Death Cases
+  data24 = data30%>%select(c("Date","deaths"))
+  data24 = mutate(data24[-1,],Variation = diff(data24$deaths)*(-1))
+  data24$deaths = NULL 
+  
+  
+  plot25 = ggplot(data24) +
+    aes(x = Date, y = Variation, colour = Variation) +
+    geom_line(size = 1L) +
+    scale_color_gradient() +
+    labs(x = "Date", y = "Deaths Increase", title = "Deaths Increase/day") +
+    ggthemes::theme_gdocs()+stat_smooth(method = "auto")
+  
+  
+  ### Recovered Cases
+  data25 = data30%>%select(c("Date","recovered"))
+  data25 = mutate(data25[-1,],Variation = diff(data25$recovered)*(-1))
+  data25$recovered = NULL 
+  
+  
+  plot26 = ggplot(data25) +
+    aes(x = Date, y = Variation, colour = Variation) +
+    geom_line(size = 1L) +
+    scale_color_gradient() +
+    labs(x = "Date", y = "Recovered Increase", title = "Recovered Increase/day") +
+    ggthemes::theme_gdocs()+stat_smooth(method = "auto")
+  
+  #--------------------------------------------- Forecasting ----------------------------------#
+  
+  
+  #-------------------------------------Next 15 days Dates--------------------------------------#
+  
+  ds_dates = data.frame(Date = c(date+1,date+2,date+3,date+4,date+5,
+  date+6,date+7,date+8,date+9,date+10,date+11,date+12,date+13,date+14,date+15))
+  
+  
+  #-------------------------------------Next 15 days Dates--------------------------------------#
+  
+  #------------------------------------ World Confirmed Case------------------------------------#
+  
+  df1 = data%>%group_by(Date)%>%summarise(confirmed = sum(confirmed),deaths=sum(deaths),recovered = sum(recovered))%>%arrange(Date)%>%select(Date,confirmed)
+  
+  data_ts1 = ts(df1$confirmed, start=c(2020, 1), end=c(2020,nrow(df1)), frequency= nrow(df1)) 
+  
+  model1 = auto.arima(data_ts1,trace = T) 
+  
+  future1 = forecast(model1, h = 15,level = 99)%>%data.frame()
+  
+  future1[,c("Lo.99","Hi.99")] = list(NULL)
+  
+  forecast1 = cbind(ds_dates,future1)
+  
+  forecast1 = rename(forecast1, Date = Date, confirmed = Point.Forecast )
+  
+  #########
+  forecast_world_confirmed_7 = forecast1[7,"confirmed"]%>%comma()
+  forecast_world_confirmed_15 = forecast1[15,"confirmed"]%>%comma()
+  
+  fulldata1 = rbind(df1,forecast1)%>%data.frame()
+  
+  plot1 = ggplot(fulldata1) +
+    aes(x = Date, y = confirmed) +
+    geom_line(size=1.25,colour = "#d8576b") +
+    labs(x = "No. of Days", y = "Number of Confirmed Cases", subtitle = "Forecasting for next 15 Days")+
+    ggthemes::theme_gdocs() +
+    theme(legend.position = "none")
+  plot1 # World Confirmed Case
+  
+  #--------------------------------------------- World Deaths Case---------------------------------#
+  
+  df2 = data%>%group_by(Date)%>%summarise(confirmed = sum(confirmed),deaths=sum(deaths),recovered = sum(recovered))%>%arrange(Date)%>%select(Date,deaths)
+  
+  data_ts2 = ts(df2$deaths, start=c(2020, 1), end=c(2020,nrow(df2)), frequency= nrow(df2)) 
+  
+  model2 = auto.arima(data_ts2,trace = T) 
+  
+  future2 = forecast(model2, h = 15,level=99)%>%data.frame()
+  
+  future2[,c("Lo.99","Hi.99")] = list(NULL)
+  
+  forecast2 = cbind(ds_dates,future2)
+  
+  forecast2 = rename(forecast2,Date = Date, deaths = Point.Forecast )
+  
+  #########
+  forecast_world_deaths_7 = forecast2[7,"deaths"]%>%comma()
+  forecast_world_deaths_15 = forecast2[15,"deaths"]%>%comma()
+  
+  
+  fulldata2 = rbind(df2,forecast2)%>%data.frame()
+  
+  plot2 =   ggplot(fulldata2) +
+    aes(x = Date, y = deaths) +
+    geom_line(size=1.25,colour = "#d8576b") +
+    labs(x = "No. of Days", y = "Number of Death Cases", subtitle = "Forecasting for next 15 Days") +
+    ggthemes::theme_gdocs() +
+    theme(legend.position = "none")
+  
+  plot2 # World Deaths Case
+  
+  
+  #-------------------------------------Indian Confirmed Case-------------------------------------------#
+  
+  df3 = filter(data, Country=="India")%>%select(Date,confirmed)%>%arrange(Date)
+  
+  data_ts3 = ts(df3$confirmed, start=c(2020, 1), end=c(2020,nrow(df3)), frequency= nrow(df3)) 
+  
+  model3 = auto.arima(data_ts3,trace = T) 
+  
+  future3 = forecast(model3, h = 15,level = 99)%>%data.frame()
+  
+  future3[,c("Lo.99","Hi.99")] = list(NULL)
+  
+  forecast3 = cbind(ds_dates,future3)
+  
+  forecast3 = rename(forecast3,Date = Date, confirmed = Point.Forecast )
+  
+  forecast_india_confirmed_7 = forecast3[7,"confirmed"]%>%comma()
+  forecast_india_confirmed_15 = forecast3[15,"confirmed"]%>%comma()
+  
+  
+  fulldata3 = rbind(df3,forecast3)
+  
+  plot3 =   ggplot(fulldata3) +
+    aes(x = Date, y = confirmed) +
+    geom_line(size=1.25,colour = "#d8576b") +
+    labs(x = "No. of Days", y = "Number of Confirmed Cases", subtitle = "Forecasting for next 15 Days") +
+    ggthemes::theme_gdocs() +
+    theme(legend.position = "none")
+  
+  plot3 # Indian Confirmed Case
+  
+  
+  #---------------------------------------------Indian Deaths Case------------------------------------#
+  
+  df4 = filter(data, Country=="India")%>%select(Date,deaths)%>%arrange(Date)
+  
+  data_ts4 = ts(df4$deaths, start=c(2020, 1), end=c(2020,nrow(df4)), frequency= nrow(df4)) 
+  
+  model4 = auto.arima(data_ts4,trace = T) 
+  
+  future4 = forecast(model4, h = 15,level = 99)%>%data.frame()
+  
+  future4[,c("Lo.99","Hi.99")] = list(NULL)
+  
+  forecast4 = cbind(ds_dates,future4)
+  
+  forecast4 = rename(forecast4,Date = Date, deaths = Point.Forecast )
+  
+  ######
+  forecast_india_deaths_7 = forecast4[7,"deaths"]%>%comma()
+  forecast_india_deaths_15 = forecast4[15,"deaths"]%>%comma()
+  
+  fulldata4 = rbind(df4,forecast4)
+  
+  plot4 =   ggplot(fulldata4) +
+    aes(x = Date, y = deaths) +
+    geom_line(size=1.25,colour = "#d8576b") +
+    labs(x = "No. of Days", y = "Number of Death Cases", subtitle = "Forecasting for next 15 Days") +
+    ggthemes::theme_gdocs() +
+    theme(legend.position = "none")
+  
+  plot4 # Indian Deaths Case
+  
+  
+  #-------------------------------------USA Confirmed Case-------------------------------------------#
+  
+  df5 = filter(data, Country=="US")%>%select(Date,confirmed)%>%arrange(Date)
+  
+  data_ts5 = ts(df5$confirmed, start=c(2020, 1), end=c(2020,nrow(df5)), frequency= nrow(df5)) 
+  
+  model5 = auto.arima(data_ts5,trace = T) 
+  
+  future5 = forecast(model5, h = 15,level = 99)%>%data.frame()
+  
+  future5[,c("Lo.99","Hi.99")] = list(NULL)
+  
+  forecast5 = cbind(ds_dates,future5)
+  
+  forecast5 = rename(forecast5,Date = Date, confirmed = Point.Forecast )
+  
+  ####
+  forecast_usa_confirmed_7 = forecast5[7,"confirmed"]%>%comma()
+  forecast_usa_confirmed_15 = forecast5[15,"confirmed"]%>%comma()
+  
+  fulldata5 = rbind(df5,forecast5)
+  
+  plot5 =   ggplot(fulldata5) +
+    aes(x = Date, y = confirmed) +
+    geom_line(size=1.25,colour = "#d8576b") +
+    labs(x = "No. of Days", y = "Number of Confirmed Cases", subtitle = "Forecasting for next 15 Days") +
+    ggthemes::theme_gdocs() +
+    theme(legend.position = "none")
+  
+  plot5 # US Confirmed Case
+  
+  
+  #---------------------------------------------USA Deaths Case------------------------------------#
+  
+  df6 = filter(data, Country=="US")%>%select(Date,deaths)%>%arrange(Date)
+  
+  data_ts6 = ts(df6$deaths, start=c(2020, 1), end=c(2020,nrow(df6)), frequency= nrow(df6)) 
+  
+  model6 = auto.arima(data_ts6,trace = T) 
+  
+  future6 = forecast(model6, h = 15,level = 99)%>%data.frame()
+  
+  future6[,c("Lo.99","Hi.99")] = list(NULL)
+  
+  forecast6 = cbind(ds_dates,future6)
+  
+  forecast6 = rename(forecast6,Date = Date, deaths = Point.Forecast )
+  
+  ######
+  forecast_usa_deaths_7 = forecast6[7,"deaths"]%>%comma()
+  forecast_usa_deaths_15 = forecast6[15,"deaths"]%>%comma()
+  
+  fulldata6 = rbind(df6,forecast6)
+  plot6 =   ggplot(fulldata6) +
+    aes(x = Date, y = deaths) +
+    geom_line(size=1.25,colour = "#d8576b") +
+    labs(x = "No. of Days", y = "Number of Death Cases", subtitle = "Forecasting for next 15 Days") +
+    ggthemes::theme_gdocs() +
+    theme(legend.position = "none")
+  
+  plot6 # US Deaths Case
+  
+  #---------------------------------------% Contribution of cases-----------------------------------#
+  
+  #World
+  
+  
+  world_death_per =  sprintf("%3g%%",round((total_death/total_confirmed)*100,digits = 2)) 
+  world_recovered_per =  sprintf("%3g%%",round((total_recovered/total_confirmed)*100,digits = 2))
+  world_active_per =  sprintf("%3g%%",round((total_active/total_confirmed)*100,digits = 2))
+  
+  
+  #India
+  
+  India_death_per = sprintf("%3g%%",round((Indian_Deaths/Indian_Confirmed)*100,digits = 2)) 
+  India_recovered_per =  sprintf("%3g%%",round((Indian_Recovered/Indian_Confirmed)*100,digits = 2))
+  India_active_per =  sprintf("%3g%%",round((Indian_Active/Indian_Confirmed)*100,digits = 2))
+  
+  #USA
+  
+  US_death_per = sprintf("%3g%%",round((US_Deaths/US_Confirmed)*100,digits = 2)) 
+  US_recovered_per =  sprintf("%3g%%",round((US_Recovered/US_Confirmed)*100,digits = 2))
+  US_active_per =  sprintf("%3g%%",round((Us_Active/US_Confirmed)*100,digits = 2))
+  
+  
+  
+  #--------------------------------------------------Geo Spatial Analysis----------------------------------------------#
+  
+  world <- ne_countries(scale = "medium",continent = NULL,geounit = NULL,sovereignty = NULL, returnclass = "sf")%>%rename(Country=sovereignt)%>%select(c("Country","geometry"))
+  data100 = data2
+  data100$Country = as.character(data100$Country)
+  
+  data100$Country = ifelse(data100$Country=="US","United States of America",ifelse(data100$Country=="Bahamas","The Bahamas",ifelse(data100$Country=="Congo (Brazzaville)","Republic of Congo",ifelse(data100$Country=="Congo (Kinshasa)","Democratic Republic of the Congo",
+                                                                                                                                                                                                     ifelse(data100$Country=="Cote d'Ivoire","Ivory Coast",ifelse(data100$Country=="Cyprus","Northern Cyprus",ifelse(data100$Country=="Czechia","Czech Republic",ifelse(data100$Country=="Guinea-Bissau","Guinea Bissau",
+                                                                                                                                                                                                                                                                                                                                                                        ifelse(data100$Country=="Korea, South","South Korea",ifelse(data100$Country=="North Macedonia","Macedonia",ifelse(data100$Country=="Burma","Myanmar",ifelse(data100$Country=="Serbia","Republic of Serbia",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    ifelse(data100$Country=="Taiwan*","Taiwan",ifelse(data100$Country=="Switzerland","Swaziland",ifelse(data100$Country=="Timor-Leste","East Timor",ifelse(data100$Country=="Tanzania","United Republic of Tanzania",data100$Country))))))))))))))))
+  
+  data_merged1 = left_join(world,data100,by="Country")
+  
+  #Confirmed
+  
+  geo1 = ggplot(data_merged1) +
+    aes(fill = confirmed) +
+    geom_sf(size = 1L) +
+    scale_fill_distiller(palette = "Paired") +
+    labs(title = "Confirmed") +
+    theme_few()
+  
+  #Deaths
+  
+  geo2 = ggplot(data_merged1) +
+    aes(fill = deaths) +
+    geom_sf(size = 1L) +
+    scale_fill_distiller(palette = "Paired") +
+    labs(title = "Deaths") +
+    theme_few()
+  
+  
+  #Recovered
+  
+  geo3 = ggplot(data_merged1) +
+    aes(fill = recovered) +
+    geom_sf(size = 1L) +
+    scale_fill_distiller(palette = "Paired") +
+    labs(title = "Recovered") +
+    theme_few()
+  
+  
+  #-------------------- Total countries ------------------------#
+  
+  total_countries1 = n_distinct(data2$Country)
+  
+  
+  #------------------------------------------------------Calculation Ends--------------------------------------------------------------#  
+  
+
+  #-----------------------------------Date Updation Notification--------------------------------------------------#
+  
+  
+  observeEvent(input$show,{
+    showNotification(paste0("DATA UPDATED -- ","  ",Date),type = "error",duration = 30)
+  })
+  
+  #---------------------------------------Server Outputs---------------------------------------#
+  
+  #-------------------------- For 1st tab ------------------------------#
+  
+  #-------------------------- For Sub1 1st tab ------------------------------#
+  output$total_confirmed = renderText(total_confirmed1)
+  output$total_death = renderText(paste0(total_death1,"   ","(",world_death_per,")"))
+  output$total_recovered = renderText(paste0(total_recovered1,"   ","(",world_recovered_per,")"))
+  output$total_active = renderText(paste0(total_active1,"   ","(",world_active_per,")"))
+  output$world_forecasting_total_confirmed = renderText(paste(Date+7,"Day --- ",forecast_world_confirmed_7 ," & ",Date+15,"Day --- ",forecast_world_confirmed_15))
+  output$world_forecasting_total_death = renderText(paste(Date+7,"Day --- ",forecast_world_deaths_7 ," & ",Date+15,"Day --- ",forecast_world_deaths_15))
+  output$total_confirmed_inc = renderText(data_merged_conf_delta_total)
+  output$total_death_inc = renderText(data_merged_deaths_delta_total)
+  output$total_recovered_inc = renderText(data_merged_recovered_delta_total)
+  output$mortality_overall = renderText(Mortality_Overall)
+  output$forecaseting_confirmed_ww = renderPlot(plot1)
+  output$forecaseting_deaths_ww = renderPlot(plot2)
+  output$worldvisual_confirmed = renderPlot(plot31)
+  
+  #-------------------------- For Sub2 1st tab ------------------------------#
+  
+  output$worldvisual_deaths = renderPlot(plot32)
+  output$worldvisual_recovered = renderPlot(plot33)
+  
+  #------------------------------- For 2nd tab-----------------------------#
+  
+  #-------------------------- For Sub1 2nd tab ------------------------------#
+  
+  output$top5confirmedno = renderTable(data_merged_conf_no, digits = 0)
+  output$top5deathsno = renderTable(data_merged_deaths_no,digits = 0)
+  output$top5recoveredno = renderTable(data_merged_recovered_no,digits = 0)
+  output$top5activeno = renderTable(data_merged_active_no,digits = 0)
+  output$top5confirmedper = renderTable(data_merged_conf_pr)
+  output$top5deathsper = renderTable(data_merged_death_pr)
+  output$top5recoveredper = renderTable(data_merged_recovered_inc_per)
+  output$top5activeper = renderTable(data_merged_active_pr)
+  
+  
+  #-------------------------- For Sub2 2nd tab ------------------------------#
+  
+  output$top5confirmed_day_no = renderTable(data_merged_conf_delta_no, digits = 0)
+  output$top5deaths_day_no = renderTable(data_merged_deaths_delta_no,digits = 0)
+  output$top5recovered_day_no = renderTable(data_merged_recovered_delta_no,digits = 0)
+  output$top5confirmed_day_per = renderTable(data_merged_conf_inc_per)
+  output$top5deaths_day_per = renderTable(data_merged_deaths_inc_per)
+  output$top5recovered_day_per = renderTable(data_merged_recovered_inc_per)
+  
+  
+  #-------------------------- For 3rd tab ------------------------------#
+  
+  #-------------------------- For Sub1 3rd tab ------------------------------#
+  
+  output$indianconfirmed = renderText(Indian_Confirmed1)
+  output$indiandeaths = renderText(paste0(Indian_Deaths1,"   ","(",India_death_per,")"))
+  output$indianrecovered = renderText(paste0(Indian_Recovered1,"   ","(",India_recovered_per,")"))
+  output$indianactive = renderText(paste0(Indian_Active1,"   ","(",India_active_per,")"))
+  output$india_forecasting_total_confirmed = renderText(paste(Date+7,"Day --- ",forecast_india_confirmed_7 ," & ",Date+15,"Day --- ",forecast_india_confirmed_15))
+  output$india_forecasting_total_death = renderText(paste(Date+7,"Day --- ",forecast_india_deaths_7 ," & ",Date+15,"Day --- ",forecast_india_deaths_15))
+  output$indianconfirmed_inc = renderText(Indian_Confirmed_Increase)
+  output$indiandeaths_inc = renderText(Indian_Deaths_Increase)
+  output$indianrecovered_inc = renderText(Indian_Recovered_Increase)
+  output$indianmortality = renderText(Indian_Mortality)
+  output$forecaseting_confirmed_india = renderPlot(plot3)
+  output$forecaseting_deaths_india = renderPlot(plot4)
+  output$indiavisual_confirmed = renderPlot(plot21)
+  
+  #-------------------------- For Sub2 3rd tab ------------------------------#
+  
+  output$indiavisual_deaths = renderPlot(plot22)
+  output$indiavisual_recovered = renderPlot(plot23)
+  
+  #-------------------------- For 4th tab ------------------------------#
+  
+  #-------------------------- For Sub1 4th tab ------------------------------#
+  output$usconfirmed = renderText(US_Confirmed1)
+  output$usdeaths = renderText(paste0(US_Deaths1,"   ","(",US_death_per,")"))
+  output$usrecovered = renderText(paste0(US_Recovered1,"   ","(",US_recovered_per,")"))
+  output$usactive = renderText(paste0(Us_Active1,"   ","(",US_active_per,")"))
+  output$usa_forecasting_total_confirmed = renderText(paste(Date+7,"Day --- ",forecast_usa_confirmed_7 ," & ",Date+15,"Day --- ",forecast_usa_confirmed_15))
+  output$usa_forecasting_total_death = renderText(paste(Date+7,"Day --- ",forecast_usa_deaths_7 ," & ",Date+15,"Day --- ",forecast_usa_deaths_15))
+  output$usconfirmed_inc = renderText(US_Confirmed_Increase)
+  output$usdeaths_inc = renderText(US_Deaths_Increase)
+  output$usrecovered_inc = renderText(US_Recovered_Increase)
+  output$usmortality = renderText(US_Mortality)
+  output$forecaseting_confirmed_us = renderPlot(plot5)
+  output$forecaseting_deaths_us = renderPlot(plot6)
+  output$usavisual_confirmed = renderPlot(plot24)
+  
+  #-------------------------- For Sub2 4th tab ------------------------------#
+  
+  output$usavisual_deaths = renderPlot(plot25)
+  output$usavisual_recovered = renderPlot(plot26)
+  
+  
+  #---------------------------------For 5th tab---------------------------------------#
+  
+  output$geo_confirmed = renderPlot(geo1)
+  output$geo_deaths = renderPlot(geo2)
+  output$geo_recovered = renderPlot(geo3)
+  output$total_countries = renderText(total_countries1)
+  
+}
+
+#-------------------------------------------------- End of Shiny Dashboard -------------------------------------------#
+shinyApp(ui = ui, server = server)
+
+
+
